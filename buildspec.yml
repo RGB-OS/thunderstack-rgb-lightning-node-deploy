@@ -1,0 +1,12 @@
+version: 0.2
+phases:
+  pre_build:
+    commands:
+      - terraform init
+      - terraform validate
+      - terraform plan
+ 
+  build:
+    commands:
+      - if [ "$TERRAFORM_ACTION" = "apply" ]; then terraform apply --auto-approve -var="user_id=${USER_ID} -var="user_node_ids=${USER_NODE_IDS}"; fi
+      - if [ "$TERRAFORM_ACTION" = "destroy" ]; then terraform destroy --auto-approve -var="user_id=${USER_ID} -var="user_node_ids=${USER_NODE_IDS}; fi
