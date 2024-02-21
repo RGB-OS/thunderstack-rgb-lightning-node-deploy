@@ -8,8 +8,6 @@ terraform {
   backend "s3" {
       bucket = "rgb-infra-vpc-backend"
       encrypt = true
-      region = var.region
-      key = "terraform_backend/${var.user_id}.tfstate"
   }
 }
 
