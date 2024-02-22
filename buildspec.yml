@@ -4,7 +4,7 @@ phases:
     commands:
       - terraform init -backend-config="region=us-east-2" -backend-config="key=terraform_backend/${USER_ID}.tfstate"
       - terraform validate
-      - terraform plan -var="user_id=${USER_ID} -var="user_node_ids=${USER_NODE_IDS}"
+      - terraform plan -var="user_id=${USER_ID}" -var="user_node_ids=${USER_NODE_IDS}"
  
   build:
     commands:
