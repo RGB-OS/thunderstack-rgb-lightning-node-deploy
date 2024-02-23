@@ -8,5 +8,4 @@ phases:
  
   build:
     commands:
-      - if [ "$TERRAFORM_ACTION" = "apply" ]; then terraform apply --auto-approve -var="user_id=${USER_ID}" -var="user_node_ids=${USER_NODE_IDS}"; fi
-      - if [ "$TERRAFORM_ACTION" = "destroy" ]; then terraform destroy --auto-approve -var="user_id=${USER_ID}" -var="user_node_ids=${USER_NODE_IDS}"; fi
+      - terraform apply --auto-approve -var="user_id=${USER_ID}" -var="user_node_ids=${USER_NODE_IDS}"

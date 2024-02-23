@@ -2,7 +2,7 @@
 resource "aws_lb" "application_load_balancer" {
   for_each = toset(var.user_node_ids)
 
-  name               = "${var.user_id}" #load balancer name
+  name               = each.key #load balancer name
   load_balancer_type = "application"
   subnets = [data.terraform_remote_state.vpc.outputs.subnet_a_id, data.terraform_remote_state.vpc.outputs.subnet_b_id]
 
@@ -20,7 +20,7 @@ resource "aws_lb" "application_load_balancer" {
 resource "aws_lb_target_group" "target_group" {
   for_each = toset(var.user_node_ids)
 
-  name        = "${var.user_id}"
+  name        = each.key
   port        = 3001
   protocol    = "HTTP"
   target_type = "ip"
