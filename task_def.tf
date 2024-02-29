@@ -1,33 +1,55 @@
-# Create task_definition
 resource "aws_ecs_task_definition" "rgb_task" {
   for_each = toset(var.user_node_ids)
 
-  family                   = "rln-${var.user_id}" # Name your task
- 
-  container_definitions    = <<DEFINITION
-  [
+  family = "rln-${var.user_id}" # Name your task
+
+  container_definitions = jsonencode([
     {
-      "name": "rln-${var.user_id}",
-      "image": "${data.terraform_remote_state.vpc.outputs.ecr_repository_url}",
-      "essential": true,
-      "portMappings": [
+      name         = "rln-${var.user_id}",
+      image        = "${data.terraform_remote_state.vpc.outputs.ecr_repository_url}",
+      essential    = true,
+      command      = [
+                "user:password@18.119.98.232:18443",
+                "/dataldk0/",
+                "--daemon-listening-port",
+                "3001",
+                "--ldk-peer-listening-port",
+                "9735",
+                "--network",
+                "regtest"
+            ]
+      portMappings = [
         {
-          "containerPort": 3001,
-          "hostPort": 3001
+          containerPort = 3001,
+          hostPort      = 3001
+        },
+        {
+          containerPort = 9735, 
+          hostPort      = 9735
         }
       ],
-      "memory": 512,
-      "cpu": 256
+      memory       = 512,
+      cpu          = 256,
+      logConfiguration = {
+        logDriver = "awslogs",
+        options = {
+          awslogs-group         = "/ecs/rln-${var.user_id}"
+          awslogs-region        = "us-east-2", 
+          awslogs-stream-prefix = "ecs", 
+          awslogs-create-group  = "true"
+        }
+      }
     }
-  ]
-  DEFINITION
-  requires_compatibilities = ["FARGATE"] # use Fargate as the launch type
-  network_mode             = "awsvpc"    # add the AWS VPN network mode as this is required for Fargate
-  memory                   = 512         # Specify the memory the container requires
-  cpu                      = 256         # Specify the CPU the container requires
+  ])
+
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  memory                   = 512
+  cpu                      = 256
   execution_role_arn       = "${data.terraform_remote_state.vpc.outputs.ecs_task_execution_role_arn}"
+
   tags = {
-    user_id = var.user_id
+    user_id      = var.user_id
     user_node_id = each.key
   }
 }

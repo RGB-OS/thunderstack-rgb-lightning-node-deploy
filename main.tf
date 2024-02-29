@@ -25,6 +25,18 @@ resource "aws_lb_target_group" "target_group" {
   protocol    = "HTTP"
   target_type = "ip"
   vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
+
+  health_check {
+    enabled             = true
+    path                = "/nodeinfo"
+    protocol            = "HTTP"
+    matcher             = "200,403"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 3
+    unhealthy_threshold = 3
+  }
+
   tags = {
     user_id = var.user_id
     user_node_id = each.key
@@ -36,7 +48,7 @@ resource "aws_lb_listener" "listener" {
   for_each = toset(var.user_node_ids)
 
   load_balancer_arn = "${aws_lb.application_load_balancer[each.key].arn}" #  load balancer
-  port              = "30001"
+  port              = "3001"
   protocol          = "HTTP"
   default_action {
     type             = "forward"
