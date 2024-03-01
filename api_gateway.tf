@@ -53,10 +53,14 @@ resource "aws_api_gateway_integration" "nlb_integration" {
 }
 
 resource "aws_api_gateway_deployment" "deployment" {
+  for_each = toset(var.user_node_ids)
   rest_api_id = "nvuiiz6k23"
   stage_name  = "dev"
 
-  # Use a lifecycle block to recreate the deployment if integrations change.
+  triggers = {
+    redeployment = sha1(jsonencode(aws_api_gateway_integration.nlb_integration[each.key].id))
+  }
+
   lifecycle {
     create_before_destroy = true
   }
