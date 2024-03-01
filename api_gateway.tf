@@ -53,10 +53,12 @@ resource "aws_api_gateway_integration" "nlb_integration" {
 }
 
 resource "aws_api_gateway_deployment" "deployment" {
-  depends_on = [
-    aws_api_gateway_integration.nlb_integration
-  ]
-
   rest_api_id = "nvuiiz6k23"
   stage_name  = "dev"
+
+  # Use a lifecycle block to recreate the deployment if integrations change.
+  lifecycle {
+    create_before_destroy = true
+  }
 }
+
