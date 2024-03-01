@@ -57,6 +57,8 @@ resource "aws_api_gateway_deployment" "deployment" {
   rest_api_id = "nvuiiz6k23"
   stage_name  = "dev"
 
+  description = "Deployment at ${timestamp()}"
+
   triggers = {
     redeployment = sha1(jsonencode(aws_api_gateway_integration.nlb_integration[each.key].id))
   }
@@ -66,3 +68,13 @@ resource "aws_api_gateway_deployment" "deployment" {
   }
 }
 
+resource "aws_api_gateway_stage" "dev_stage" {
+  for_each = toset(var.user_node_ids)
+  stage_name    = "dev"
+  rest_api_id   = "nvuiiz6k23"
+  deployment_id = aws_api_gateway_deployment.deployment[each.key].id
+
+  lifecycle {
+    ignore_changes = [deployment_id]
+  }
+}
