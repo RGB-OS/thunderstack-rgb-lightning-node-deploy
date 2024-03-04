@@ -1,5 +1,5 @@
 resource "aws_ecs_task_definition" "rgb_task" {
-  for_each = toset(var.user_node_ids)
+  for_each = var.user_node_ids
 
   family = "rln-${var.user_id}" # Name your task
 
@@ -12,7 +12,7 @@ resource "aws_ecs_task_definition" "rgb_task" {
                 "user:password@18.119.98.232:18443",
                 "/dataldk0/",
                 "--daemon-listening-port",
-                "3001",
+                tostring(each.value),
                 "--ldk-peer-listening-port",
                 "9735",
                 "--network",
@@ -20,8 +20,8 @@ resource "aws_ecs_task_definition" "rgb_task" {
             ]
       portMappings = [
         {
-          containerPort = 3001,
-          hostPort      = 3001
+          containerPort = each.value,
+          hostPort      = each.value
         },
         {
           containerPort = 9735, 

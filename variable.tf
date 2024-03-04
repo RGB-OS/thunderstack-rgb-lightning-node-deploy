@@ -12,6 +12,12 @@ variable "user_id" {
 }
 
 variable "user_node_ids" {
-  description = "Unique user identifiers for resource tagging and isolation"
-  type        = list
+  description = "Map of user node IDs to their respective ports"
+  type = map(number)
+  # Example:
+  # default = {
+  #   "node1" = 3001,
+  #   "node2" = 3002,
+  #   "node3" = 3003
+  # }
 }

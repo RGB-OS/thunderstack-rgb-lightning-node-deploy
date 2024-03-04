@@ -1,6 +1,6 @@
 # Create ecs service
 resource "aws_ecs_service" "rgb_service" {
-  for_each = toset(var.user_node_ids)
+  for_each = var.user_node_ids
 
   name            = "lightning-${var.user_id}-${each.key}"     # Name the service
   cluster         = "${data.terraform_remote_state.vpc.outputs.ecs_cluster_id}"   # Reference the created Cluster
@@ -11,7 +11,7 @@ resource "aws_ecs_service" "rgb_service" {
   load_balancer {
     target_group_arn = aws_lb_target_group.target_group[each.key].arn # Reference the target group
     container_name   = aws_ecs_task_definition.rgb_task[each.key].family
-    container_port   = 3001 # Specify the container port
+    container_port   = each.value
   }
 
   network_configuration {
