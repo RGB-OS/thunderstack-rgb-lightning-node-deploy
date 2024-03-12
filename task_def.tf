@@ -1,7 +1,7 @@
 resource "aws_ecs_task_definition" "rgb_task" {
   for_each = var.user_node_ids
 
-  family = "rln-${var.user_id}" # Name your task
+  family = "rln-${var.user_id}"
 
   container_definitions = jsonencode([
     {
@@ -33,7 +33,7 @@ resource "aws_ecs_task_definition" "rgb_task" {
       logConfiguration = {
         logDriver = "awslogs",
         options = {
-          awslogs-group         = "/ecs/rln-${var.user_id}"
+          awslogs-group         = "/ecs/rln-${var.user_id}-${each.key}"
           awslogs-region        = "us-east-2", 
           awslogs-stream-prefix = "ecs", 
           awslogs-create-group  = "true"
