@@ -13,6 +13,8 @@ resource "aws_ecs_service" "rgb_service" {
     container_name   = aws_ecs_task_definition.rgb_task[each.key].family
     container_port   = each.value
   }
+  
+  enable_execute_command = true
 
   network_configuration {
     subnets          = [data.terraform_remote_state.vpc.outputs.subnet_a_id, data.terraform_remote_state.vpc.outputs.subnet_b_id]
