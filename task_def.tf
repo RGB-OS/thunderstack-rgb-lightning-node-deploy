@@ -2,7 +2,6 @@ resource "aws_ecs_task_definition" "rgb_task" {
   for_each = var.user_node_ids
 
   family = "rln-${var.user_id}"
-
   container_definitions = jsonencode([
     {
       name         = "rln-${var.user_id}",
@@ -48,6 +47,7 @@ resource "aws_ecs_task_definition" "rgb_task" {
   memory                   = 512
   cpu                      = 256
   execution_role_arn       = "${data.terraform_remote_state.vpc.outputs.ecs_task_execution_role_arn}"
+  task_role_arn            = "${data.terraform_remote_state.vpc.outputs.ecs_task_execution_role_arn}"
 
   tags = {
     user_id      = var.user_id
