@@ -9,6 +9,7 @@ resource "aws_ecs_task_definition" "rgb_task" {
       image        = "${data.terraform_remote_state.vpc.outputs.ecr_repository_url}",
       essential    = true,
       command      = [
+                "rln-backups",
                 "user:password@18.119.98.232:18443",
                 "/dataldk0/",
                 "--daemon-listening-port",
