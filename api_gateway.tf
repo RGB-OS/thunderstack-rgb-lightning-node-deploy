@@ -118,5 +118,6 @@ resource "aws_api_gateway_deployment" "deployment" {
   depends_on = [
     aws_api_gateway_method.proxy_any_method,
     aws_api_gateway_integration.nlb_integration,
+    aws_api_gateway_integration.cors_options_integration
   ]
 }
