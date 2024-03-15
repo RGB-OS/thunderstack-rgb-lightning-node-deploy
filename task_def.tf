@@ -7,6 +7,7 @@ resource "aws_ecs_task_definition" "rgb_task" {
       name         = "rln-${var.user_id}",
       image        = "${data.terraform_remote_state.vpc.outputs.ecr_repository_url}",
       essential    = true,
+      privileged = true,
       command      = [
                 "rln-backups",
                 "user:password@18.119.98.232:18443",
@@ -25,10 +26,10 @@ resource "aws_ecs_task_definition" "rgb_task" {
         },
         {
           containerPort = 9735, 
-          hostPort      = 9735
+          hostPort      = min(65535, 9000 + tonumber(each.value))
         }
       ],
-      memory       = 512,
+      memory       = 128,
       cpu          = 256,
       logConfiguration = {
         logDriver = "awslogs",
@@ -42,9 +43,9 @@ resource "aws_ecs_task_definition" "rgb_task" {
     }
   ])
 
-  requires_compatibilities = ["FARGATE"]
-  network_mode             = "awsvpc"
-  memory                   = 512
+  requires_compatibilities = ["EC2"]
+  network_mode             = "bridge"
+  memory                   = 128
   cpu                      = 256
   execution_role_arn       = "${data.terraform_remote_state.vpc.outputs.ecs_task_execution_role_arn}"
   task_role_arn            = "${data.terraform_remote_state.vpc.outputs.ecs_task_execution_role_arn}"

@@ -7,7 +7,7 @@ resource "aws_lb_target_group" "target_group" {
   name        = each.key
   port        = each.value
   protocol    = "TCP" 
-  target_type = "ip"
+  target_type = "instance"
   vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
 
   health_check {
