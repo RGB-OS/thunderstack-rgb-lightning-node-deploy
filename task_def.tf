@@ -30,7 +30,7 @@ resource "aws_ecs_task_definition" "rgb_task" {
         }
       ],
       memory       = 768,
-      cpu          = 1512,
+      cpu          = 768,
       logConfiguration = {
         logDriver = "awslogs",
         options = {
