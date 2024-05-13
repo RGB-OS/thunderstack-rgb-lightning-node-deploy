@@ -73,7 +73,7 @@ resource "aws_api_gateway_method" "proxy_any_method_token" {
   resource_id   = aws_api_gateway_resource.proxy_resource_token[each.key].id
   http_method   = "ANY"
   authorization = "CUSTOM"
-  authorizer_id = "9rfqdx"
+  authorizer_id = "d2ece7"
   request_parameters = {
     "method.request.path.proxy" = true
   }
