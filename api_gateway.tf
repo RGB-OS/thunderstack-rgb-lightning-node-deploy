@@ -73,7 +73,7 @@ resource "aws_api_gateway_method" "proxy_any_method" {
   resource_id   = aws_api_gateway_resource.proxy_resource[each.key].id
   http_method   = "ANY"
   authorization = "COGNITO_USER_POOLS"
-  authorizer_id = "9ge7s1"
+  authorizer_id = var.cognito_authorizer_id
   request_parameters = {
     "method.request.path.proxy" = true
   }
