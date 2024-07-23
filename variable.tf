@@ -21,6 +21,11 @@ variable "btc_network" {
   type        = string
 }
 
+variable "env" {
+  description = "Thanderstack enviroment type (test/prod)"
+  type        = string
+}
+
 variable "user_node_ids" {
   description = "Map of user node IDs to their respective ports"
   type = map(number)
