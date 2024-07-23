@@ -2,7 +2,7 @@ version: 0.2
 phases:
   pre_build:
     commands:
-      - terraform init -backend-config="bucket=rgb-${ENV}-infra-vpc-backend" -backend-config="region=us-east-2" -backend-config="key=terraform_backend/${USER_ID}.tfstate"
+      - terraform init -backend-config="bucket=rln-${ENV}-terraform-backend" -backend-config="region=us-east-2" -backend-config="key=terraform_backend/${USER_ID}.tfstate"
       - terraform validate
       - terraform plan -var="user_id=${USER_ID}" -var="user_node_ids=${USER_NODE_IDS} -var="btc_network=${BTC_NETWORK} -var="btc_rpc=${BTC_RPC}"
  
