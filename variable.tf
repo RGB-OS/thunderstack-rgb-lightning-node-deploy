@@ -11,6 +11,16 @@ variable "user_id" {
   type        = string
 }
 
+variable "btc_rpc" {
+  description = "user:password@HOSTNAME:PORT"
+  type        = string
+}
+
+variable "btc_network" {
+  description = "BTC Network (mainnet,testnet,regrest)"
+  type        = string
+}
+
 variable "user_node_ids" {
   description = "Map of user node IDs to their respective ports"
   type = map(number)

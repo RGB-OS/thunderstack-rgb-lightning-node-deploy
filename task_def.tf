@@ -10,14 +10,14 @@ resource "aws_ecs_task_definition" "rgb_task" {
       privileged = true,
       command      = [
                 "rln-backups",
-                "user:password@18.119.98.232:18443",
+                "${var.btc_rpc}",
                 "/dataldk0/",
                 "--daemon-listening-port",
                 tostring(each.value),
                 "--ldk-peer-listening-port",
                 "9735",
                 "--network",
-                "regtest"
+                "${var.btc_network}"
             ]
       portMappings = [
         {

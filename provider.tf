@@ -5,10 +5,7 @@ terraform {
         version = "~> 5.0"
     }
   }
-  backend "s3" {
-      bucket = "rgb-infra-vpc-backend"
-      encrypt = true
-  }
+  backend "s3" {}
 }
 
 provider "aws" {
@@ -18,7 +15,7 @@ provider "aws" {
 data "terraform_remote_state" "vpc" {
   backend = "s3"
   config = {
-    bucket = "rgb-infra-vpc-backend"
+    bucket = "rln-${var.env}-terraform-backend"
     key    = "terraform_backend/terraform.tfstate"
     region = var.region
   }
