@@ -15,7 +15,7 @@ provider "aws" {
 data "terraform_remote_state" "vpc" {
   backend = "s3"
   config = {
-    bucket = "rln-${var.env}-terraform-backend"
+    bucket = "rgb-infra-vpc-backend"
     key    = "terraform_backend/terraform.tfstate"
     region = var.region
   }
