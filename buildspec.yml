@@ -4,8 +4,8 @@ phases:
     commands:
       - terraform init -backend-config="bucket=rln-${ENV}-terraform-backend" -backend-config="region=us-east-2" -backend-config="key=terraform_backend/${USER_ID}.tfstate"
       - terraform validate
-      - terraform plan -var="user_id=${USER_ID}" -var="user_node_ids=${USER_NODE_IDS}" -var="btc_network=${BTC_NETWORK}" -var="btc_rpc=${BTC_RPC}" -var="env=${ENV}" -var="cognito_authorizer_id=${COGNITO_AUTH_ID}"
+      - terraform plan -var="user_id=${USER_ID}" -var="user_node_ids=${USER_NODE_IDS}" -var="btc_network=${BTC_NETWORK}" -var="btc_rpc=${BTC_RPC}" -var="env=${ENV}" -var="cognito_authorizer_id=${COGNITO_AUTH_ID}" -var="token_authorizer_id=${TOKEN_AUTHORIZER_ID}"
  
   build:
     commands:
-      - terraform apply --auto-approve -var="user_id=${USER_ID}" -var="user_node_ids=${USER_NODE_IDS}" -var="btc_network=${BTC_NETWORK}" -var="btc_rpc=${BTC_RPC}" -var="env=${ENV}" -var="cognito_authorizer_id=${COGNITO_AUTH_ID}"
+      - terraform apply --auto-approve -var="user_id=${USER_ID}" -var="user_node_ids=${USER_NODE_IDS}" -var="btc_network=${BTC_NETWORK}" -var="btc_rpc=${BTC_RPC}" -var="env=${ENV}" -var="cognito_authorizer_id=${COGNITO_AUTH_ID}" -var="token_authorizer_id=${TOKEN_AUTHORIZER_ID}"

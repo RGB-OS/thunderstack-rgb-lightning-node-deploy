@@ -31,6 +31,11 @@ variable "cognito_authorizer_id" {
   type        = string
 }
 
+variable "token_authorizer_id" {
+  description = "Token authorizer ID"
+  type        = string
+}
+
 variable "user_node_ids" {
   description = "Map of user node IDs to their respective ports"
   type = map(number)
