@@ -36,6 +36,11 @@ variable "token_authorizer_id" {
   type        = string
 }
 
+variable "docker_image_tag" {
+  description = "Token authorizer ID"
+  type        = string
+}
+
 variable "user_node_ids" {
   description = "Map of user node IDs to their respective ports"
   type = map(number)

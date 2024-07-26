@@ -5,7 +5,7 @@ resource "aws_ecs_task_definition" "rgb_task" {
   container_definitions = jsonencode([
     {
       name         = "rln-${var.user_id}",
-      image        = "${data.terraform_remote_state.vpc.outputs.ecr_repository_url}",
+      image        = "${data.terraform_remote_state.vpc.outputs.ecr_repository_url}:${var.docker_image_tag}",
       essential    = true,
       privileged = true,
       command      = [
