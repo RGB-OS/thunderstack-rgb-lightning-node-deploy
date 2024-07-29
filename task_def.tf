@@ -15,7 +15,7 @@ resource "aws_ecs_task_definition" "rgb_task" {
                 "--daemon-listening-port",
                 tostring(each.value),
                 "--ldk-peer-listening-port",
-                "9735",
+                min(65535, 9000 + tonumber(each.value)),
                 "--network",
                 "${var.btc_network}"
             ]
@@ -25,7 +25,7 @@ resource "aws_ecs_task_definition" "rgb_task" {
           hostPort      = each.value
         },
         {
-          containerPort = 9735, 
+          containerPort = min(65535, 9000 + tonumber(each.value))
           hostPort      = min(65535, 9000 + tonumber(each.value))
         }
       ],
