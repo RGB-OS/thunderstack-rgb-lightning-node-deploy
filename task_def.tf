@@ -25,7 +25,7 @@ resource "aws_ecs_task_definition" "rgb_task" {
           hostPort      = each.value
         },
         {
-          containerPort = min(65535, 9000 + tonumber(each.value))
+          containerPort = min(65535, 9000 + tonumber(each.value)),
           hostPort      = min(65535, 9000 + tonumber(each.value))
         }
       ],
