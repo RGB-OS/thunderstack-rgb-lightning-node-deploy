@@ -86,7 +86,7 @@ resource "aws_api_gateway_integration" "nlb_integration_mtls" {
   http_method             = aws_api_gateway_method.proxy_any_method_mtls[each.key].http_method
   integration_http_method = "ANY"
   type                    = "HTTP_PROXY"
-  uri = "http://${data.terraform_remote_state.vpc.outputs.network_load_balancer_dns_name}:${each.value}/{proxy}"
+  uri = "http://vpc-link-nlb-public-1c83ff42632a54a8.elb.us-east-2.amazonaws.com:${each.value}/{proxy}"
   connection_type         = "VPC_LINK"
   connection_id           = "rf56qp"
   request_parameters = {
