@@ -8,7 +8,7 @@ resource "aws_lb_target_group" "target_group" {
   port        = each.value
   protocol    = "TCP" 
   target_type = "instance"
-  vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
+  vpc_id      = "vpc-05c710de26ff3d5fb"
 
   health_check {
     enabled             = true
@@ -29,7 +29,7 @@ resource "aws_lb_target_group" "target_group" {
 resource "aws_lb_listener" "listener" {
   for_each = var.user_node_ids
 
-  load_balancer_arn = data.terraform_remote_state.vpc.outputs.network_load_balancer_arn
+  load_balancer_arn = "arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public/1c83ff42632a54a8"
   port              = each.value
   protocol          = "TCP" 
   default_action {

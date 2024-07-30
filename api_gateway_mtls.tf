@@ -88,7 +88,7 @@ resource "aws_api_gateway_integration" "nlb_integration_mtls" {
   type                    = "HTTP_PROXY"
   uri = "http://${data.terraform_remote_state.vpc.outputs.network_load_balancer_dns_name}:${each.value}/{proxy}"
   connection_type         = "VPC_LINK"
-  connection_id           = data.terraform_remote_state.vpc.outputs.vpc_link_id
+  connection_id           = "rf56qp"
   request_parameters = {
     "integration.request.path.proxy" = "method.request.path.proxy"
   }
