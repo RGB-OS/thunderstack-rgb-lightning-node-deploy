@@ -1,13 +1,9 @@
 # Create ecs service
-# Data source to refer to the existing Service Discovery namespace
-data "aws_service_discovery_namespace" "existing_namespace" {
-  name = "peers.thunderstack.org"
-}
 
 # Data source to refer to the existing Service Discovery service
 data "aws_service_discovery_service" "existing_service" {
-  name         = "lightning"
-  namespace_id = data.aws_service_discovery_namespace.existing_namespace.id
+  name         = "peers.thunderstack.org"
+  namespace_id = "ns-33wm445xihjw7y7f"
 }
 
 resource "aws_ecs_service" "rgb_service" {
