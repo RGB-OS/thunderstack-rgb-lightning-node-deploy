@@ -35,7 +35,7 @@ resource "aws_ecs_service" "rgb_service" {
   }
 
   service_registries {
-    registry_arn    = aws_service_discovery_service.rgb_service_discovery.arn
+    registry_arn    = aws_service_discovery_service.rgb_service_discovery[each.key].arn
     container_name  = aws_ecs_task_definition.rgb_task[each.key].family
     container_port  = min(65535, 9000 + tonumber(each.value))
   }
