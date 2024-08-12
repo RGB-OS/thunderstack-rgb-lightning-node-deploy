@@ -1,9 +1,23 @@
 # Create ecs service
 
-# Data source to refer to the existing Service Discovery service
-data "aws_service_discovery_service" "existing_service" {
-  name         = "peers.thunderstack.org"
+resource "aws_service_discovery_service" "rgb_service_discovery" {
+  for_each = var.user_node_ids
+  name         = each.key
   namespace_id = "ns-33wm445xihjw7y7f"
+
+  dns_config {
+    namespace_id = "ns-33wm445xihjw7y7f"
+    routing_policy = "MULTIVALUE"
+
+    dns_records {
+      type = "SRV"
+      ttl  = 3600
+    }
+  }
+
+  health_check_custom_config {
+    failure_threshold = 1
+  }
 }
 
 resource "aws_ecs_service" "rgb_service" {
@@ -21,7 +35,7 @@ resource "aws_ecs_service" "rgb_service" {
   }
 
   service_registries {
-    registry_arn    = data.aws_service_discovery_service.existing_service.arn
+    registry_arn    = aws_service_discovery_service.rgb_service_discovery[each.key].arn
     container_name  = aws_ecs_task_definition.rgb_task[each.key].family
     container_port  = min(65535, 9000 + tonumber(each.value))
   }
