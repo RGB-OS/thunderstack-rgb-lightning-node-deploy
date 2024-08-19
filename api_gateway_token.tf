@@ -123,7 +123,6 @@ resource "aws_api_gateway_deployment" "deployment_token" {
     create_before_destroy = true
   }
   depends_on = [
-    aws_api_gateway_method.proxy_any_method,
     aws_api_gateway_integration.nlb_integration,
     aws_api_gateway_integration.cors_options_integration
   ]
