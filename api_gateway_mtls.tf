@@ -1,4 +1,3 @@
-
 resource "aws_api_gateway_resource" "user_id_resource_mtls" {
   rest_api_id = "47c4q0dr04"
   parent_id   = "dwpebu"
@@ -25,12 +24,6 @@ resource "aws_api_gateway_method" "cors_options_mtls" {
   resource_id = aws_api_gateway_resource.proxy_resource_mtls[each.key].id
   http_method = "OPTIONS"
   authorization = "NONE"
-
-  depends_on = [
-    aws_api_gateway_resource.user_id_resource_mtls,
-    aws_api_gateway_resource.node_id_resource_mtls,
-    aws_api_gateway_resource.proxy_resource_mtls
-  ]
 }
 
 resource "aws_api_gateway_method_response" "cors_options_response_mtls" {
@@ -45,10 +38,6 @@ resource "aws_api_gateway_method_response" "cors_options_response_mtls" {
     "method.response.header.Access-Control-Allow-Methods" = true,
     "method.response.header.Access-Control-Allow-Origin"  = true
   }
-
-  depends_on = [
-    aws_api_gateway_method.cors_options_mtls
-  ]
 }
 
 resource "aws_api_gateway_integration" "cors_options_integration_mtls" {
@@ -62,10 +51,6 @@ resource "aws_api_gateway_integration" "cors_options_integration_mtls" {
   request_templates       = {
     "application/json" = "{\"statusCode\": 200}"
   }
-
-  depends_on = [
-    aws_api_gateway_method.cors_options_mtls
-  ]
 }
 
 resource "aws_api_gateway_integration_response" "cors_options_integration_response_mtls" {
@@ -82,8 +67,7 @@ resource "aws_api_gateway_integration_response" "cors_options_integration_respon
   }
 
   depends_on = [
-    aws_api_gateway_integration.cors_options_integration_mtls,
-    aws_api_gateway_method_response.cors_options_response_mtls
+    aws_api_gateway_integration.cors_options_integration_mtls  # This ensures that integration is created first
   ]
 }
 
@@ -97,10 +81,6 @@ resource "aws_api_gateway_method" "proxy_any_method_mtls" {
   request_parameters = {
     "method.request.path.proxy" = true
   }
-
-  depends_on = [
-    aws_api_gateway_integration_response.cors_options_integration_response_mtls
-  ]
 }
 
 resource "aws_api_gateway_integration" "nlb_integration_mtls" {
@@ -118,7 +98,7 @@ resource "aws_api_gateway_integration" "nlb_integration_mtls" {
   }
 
   depends_on = [
-    aws_api_gateway_method.proxy_any_method_mtls
+    aws_api_gateway_method.proxy_any_method_mtls  # This ensures that the method is created first
   ]
 }
 
@@ -142,8 +122,4 @@ resource "aws_api_gateway_deployment" "deployment_mtls" {
   lifecycle {
     create_before_destroy = true
   }
-
-  depends_on = [
-    aws_api_gateway_integration.nlb_integration_mtls
-  ]
 }

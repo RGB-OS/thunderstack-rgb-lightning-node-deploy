@@ -9,10 +9,6 @@ resource "aws_api_gateway_resource" "node_id_resource_token" {
   rest_api_id = "8619bu4cli"
   parent_id   = aws_api_gateway_resource.user_id_resource_token.id
   path_part   = each.key
-
-  depends_on = [
-    aws_api_gateway_resource.user_id_resource_token
-  ]
 }
 
 resource "aws_api_gateway_resource" "proxy_resource_token" {
@@ -20,10 +16,6 @@ resource "aws_api_gateway_resource" "proxy_resource_token" {
   rest_api_id = "8619bu4cli"
   parent_id   = aws_api_gateway_resource.node_id_resource_token[each.key].id
   path_part   = "{proxy+}"
-
-  depends_on = [
-    aws_api_gateway_resource.node_id_resource_token
-  ]
 }
 
 resource "aws_api_gateway_method" "cors_options_token" {
@@ -32,10 +24,6 @@ resource "aws_api_gateway_method" "cors_options_token" {
   resource_id = aws_api_gateway_resource.proxy_resource_token[each.key].id
   http_method = "OPTIONS"
   authorization = "NONE"
-
-  depends_on = [
-    aws_api_gateway_resource.proxy_resource_token
-  ]
 }
 
 resource "aws_api_gateway_method_response" "cors_options_response_token" {
@@ -50,10 +38,6 @@ resource "aws_api_gateway_method_response" "cors_options_response_token" {
     "method.response.header.Access-Control-Allow-Methods" = true,
     "method.response.header.Access-Control-Allow-Origin"  = true
   }
-
-  depends_on = [
-    aws_api_gateway_method.cors_options_token
-  ]
 }
 
 resource "aws_api_gateway_integration" "cors_options_integration_token" {
@@ -67,10 +51,6 @@ resource "aws_api_gateway_integration" "cors_options_integration_token" {
   request_templates       = {
     "application/json" = "{\"statusCode\": 200}"
   }
-
-  depends_on = [
-    aws_api_gateway_method.cors_options_token
-  ]
 }
 
 resource "aws_api_gateway_integration_response" "cors_options_integration_response_token" {
@@ -87,8 +67,7 @@ resource "aws_api_gateway_integration_response" "cors_options_integration_respon
   }
 
   depends_on = [
-    aws_api_gateway_integration.cors_options_integration_token,
-    aws_api_gateway_method_response.cors_options_response_token
+    aws_api_gateway_integration.cors_options_integration_token  # Ensure integration is created first
   ]
 }
 
@@ -102,10 +81,6 @@ resource "aws_api_gateway_method" "proxy_any_method_token" {
   request_parameters = {
     "method.request.path.proxy" = true
   }
-
-  depends_on = [
-    aws_api_gateway_integration_response.cors_options_integration_response_token
-  ]
 }
 
 resource "aws_api_gateway_integration" "nlb_integration_token" {
@@ -123,7 +98,7 @@ resource "aws_api_gateway_integration" "nlb_integration_token" {
   }
 
   depends_on = [
-    aws_api_gateway_method.proxy_any_method_token
+    aws_api_gateway_method.proxy_any_method_token  # Ensure method is created first
   ]
 }
 
@@ -147,8 +122,4 @@ resource "aws_api_gateway_deployment" "deployment_token" {
   lifecycle {
     create_before_destroy = true
   }
-
-  depends_on = [
-    aws_api_gateway_integration.nlb_integration_token
-  ]
 }
