@@ -122,4 +122,8 @@ resource "aws_api_gateway_deployment" "deployment" {
   lifecycle {
     create_before_destroy = true
   }
+  depends_on = [
+    aws_api_gateway_integration.nlb_integration,  # Ensures all integrations are in place
+    aws_api_gateway_integration.cors_options_integration
+  ]
 }
