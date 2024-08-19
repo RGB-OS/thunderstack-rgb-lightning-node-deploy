@@ -5,17 +5,25 @@ resource "aws_api_gateway_resource" "user_id_resource" {
 }
 
 resource "aws_api_gateway_resource" "node_id_resource" {
-  for_each = var.user_node_ids
+  for_each    = var.user_node_ids
   rest_api_id = "nvuiiz6k23"
   parent_id   = aws_api_gateway_resource.user_id_resource.id
   path_part   = each.key
+
+  depends_on = [
+    aws_api_gateway_resource.user_id_resource
+  ]
 }
 
 resource "aws_api_gateway_resource" "proxy_resource" {
-  for_each = var.user_node_ids
+  for_each    = var.user_node_ids
   rest_api_id = "nvuiiz6k23"
   parent_id   = aws_api_gateway_resource.node_id_resource[each.key].id
   path_part   = "{proxy+}"
+
+  depends_on = [
+    aws_api_gateway_resource.node_id_resource
+  ]
 }
 
 resource "aws_api_gateway_method" "cors_options" {
@@ -24,6 +32,10 @@ resource "aws_api_gateway_method" "cors_options" {
   resource_id = aws_api_gateway_resource.proxy_resource[each.key].id
   http_method = "OPTIONS"
   authorization = "NONE"
+
+  depends_on = [
+    aws_api_gateway_resource.proxy_resource
+  ]
 }
 
 resource "aws_api_gateway_method_response" "cors_options_response" {
@@ -38,6 +50,10 @@ resource "aws_api_gateway_method_response" "cors_options_response" {
     "method.response.header.Access-Control-Allow-Methods" = true,
     "method.response.header.Access-Control-Allow-Origin"  = true
   }
+
+  depends_on = [
+    aws_api_gateway_method.cors_options
+  ]
 }
 
 resource "aws_api_gateway_integration" "cors_options_integration" {
@@ -51,6 +67,10 @@ resource "aws_api_gateway_integration" "cors_options_integration" {
   request_templates       = {
     "application/json" = "{\"statusCode\": 200}"
   }
+
+  depends_on = [
+    aws_api_gateway_method.cors_options
+  ]
 }
 
 resource "aws_api_gateway_integration_response" "cors_options_integration_response" {
@@ -65,6 +85,11 @@ resource "aws_api_gateway_integration_response" "cors_options_integration_respon
     "method.response.header.Access-Control-Allow-Methods" = "'GET,POST,OPTIONS,PUT,DELETE'",
     "method.response.header.Access-Control-Allow-Origin"  = "'*'"
   }
+
+  depends_on = [
+    aws_api_gateway_integration.cors_options_integration,
+    aws_api_gateway_method_response.cors_options_response
+  ]
 }
 
 resource "aws_api_gateway_method" "proxy_any_method" {
@@ -77,6 +102,10 @@ resource "aws_api_gateway_method" "proxy_any_method" {
   request_parameters = {
     "method.request.path.proxy" = true
   }
+
+  depends_on = [
+    aws_api_gateway_integration_response.cors_options_integration_response
+  ]
 }
 
 resource "aws_api_gateway_integration" "nlb_integration" {
@@ -92,6 +121,10 @@ resource "aws_api_gateway_integration" "nlb_integration" {
   request_parameters = {
     "integration.request.path.proxy" = "method.request.path.proxy"
   }
+
+  depends_on = [
+    aws_api_gateway_method.proxy_any_method
+  ]
 }
 
 locals {
@@ -116,8 +149,6 @@ resource "aws_api_gateway_deployment" "deployment" {
   }
 
   depends_on = [
-    aws_api_gateway_method.proxy_any_method,
-    aws_api_gateway_integration.nlb_integration,
-    aws_api_gateway_integration.cors_options_integration
+    aws_api_gateway_integration.nlb_integration
   ]
 }
