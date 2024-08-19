@@ -13,3 +13,4 @@ phases:
       - cd ../deployment
       - terraform init -backend-config="bucket=rln-${ENV}-terraform-backend" -backend-config="region=us-east-2" -backend-config="key=terraform_backend/${USER_ID}.tfstate"
       - terraform apply --replace=aws_api_gateway_deployment.deployment --auto-approve
+      - sleep 30
