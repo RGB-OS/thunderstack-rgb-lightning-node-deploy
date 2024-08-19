@@ -101,29 +101,3 @@ resource "aws_api_gateway_integration" "nlb_integration_mtls" {
     aws_api_gateway_method.proxy_any_method_mtls  # This ensures that the method is created first
   ]
 }
-
-locals {
-  api_config_hash_mtls = sha1(jsonencode({
-    methods      = [for method in aws_api_gateway_method.proxy_any_method_mtls : method.id],
-    integrations = [for integration in aws_api_gateway_integration.nlb_integration_mtls : integration.id],
-  }))
-}
-
-resource "aws_api_gateway_deployment" "deployment_mtls" {
-  rest_api_id = "47c4q0dr04"
-  stage_name  = "dev"
-
-  description = "Deployment at ${timestamp()}"
-
-  triggers = {
-    redeployment = local.api_config_hash_mtls
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
-
-  depends_on = [
-    aws_api_gateway_integration.nlb_integration
-  ]
-}
