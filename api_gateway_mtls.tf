@@ -122,7 +122,4 @@ resource "aws_api_gateway_deployment" "deployment_mtls" {
   lifecycle {
     create_before_destroy = true
   }
-  depends_on = [
-    aws_api_gateway_method.proxy_any_method
-  ]
 }
