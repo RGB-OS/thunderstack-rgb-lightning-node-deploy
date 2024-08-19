@@ -9,6 +9,7 @@ phases:
  
   build:
     commands:
+      - cd main
       - terraform apply --auto-approve -var="user_id=${USER_ID}" -var="user_node_ids=${USER_NODE_IDS}" -var="btc_network=${BTC_NETWORK}" -var="btc_rpc=${BTC_RPC}" -var="env=${ENV}" -var="cognito_authorizer_id=${COGNITO_AUTH_ID}" -var="token_authorizer_id=${TOKEN_AUTHORIZER_ID}" -var=docker_image_tag=${DOCKER_IMAGE_TAG}
       - cd ../deployment
       - terraform apply --replace=aws_api_gateway_deployment.deployment
