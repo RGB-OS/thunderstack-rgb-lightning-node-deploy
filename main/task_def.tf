@@ -3,7 +3,7 @@ resource "aws_ebs_volume" "task_volume" {
 
   availability_zone = "${var.region}b"
   size              = 10
-  volume_type       = "gp3"
+  type              = "gp3"
   tags = {
     Name = "rln-ebs-${var.user_id}-${each.key}"
   }
@@ -18,7 +18,7 @@ resource "aws_ecs_task_definition" "rgb_task" {
       name         = "rln-${var.user_id}",
       image        = "${data.terraform_remote_state.vpc.outputs.ecr_repository_url}:${var.docker_image_tag}",
       essential    = true,
-      privileged = true,
+      privileged   = true,
       command      = [
                 "rln-backups",
                 aws_ebs_volume.task_volume[each.key].id,
@@ -30,7 +30,7 @@ resource "aws_ecs_task_definition" "rgb_task" {
                 tostring(min(65535, 9000 + tonumber(each.value))),
                 "--network",
                 "${var.btc_network}"
-            ]
+            ],
       portMappings = [
         {
           containerPort = each.value,
@@ -62,14 +62,10 @@ resource "aws_ecs_task_definition" "rgb_task" {
     }
   ])
 
-  volumes = [
-    {
-      name = "host_volume"
-      host = {
-        sourcePath = "/mnt"
-      }
-    }
-  ]
+  volume {
+    name = "host_volume"
+    host_path = "/mnt"
+  }
 
   requires_compatibilities = ["EC2"]
   network_mode             = "bridge"
