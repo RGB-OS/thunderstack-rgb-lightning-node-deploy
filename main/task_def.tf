@@ -1,3 +1,14 @@
+resource "aws_ebs_volume" "task_volume" {
+  for_each = var.user_node_ids
+
+  availability_zone = "${var.region}b"
+  size              = 10
+  volume_type       = "gp3"
+  tags = {
+    Name = "rln-ebs-${var.user_id}-${each.key}"
+  }
+}
+
 resource "aws_ecs_task_definition" "rgb_task" {
   for_each = var.user_node_ids
 
@@ -10,6 +21,7 @@ resource "aws_ecs_task_definition" "rgb_task" {
       privileged = true,
       command      = [
                 "rln-backups",
+                aws_ebs_volume.task_volume[each.key].id,
                 "${var.btc_rpc}",
                 "/dataldk0/",
                 "--daemon-listening-port",
@@ -39,9 +51,25 @@ resource "aws_ecs_task_definition" "rgb_task" {
           awslogs-stream-prefix = "ecs", 
           awslogs-create-group  = "true"
         }
-      }
+      },
+      mountPoints = [
+        {
+          sourceVolume  = "host_volume"
+          containerPath = "/mnt"
+          readOnly      = false
+        }
+      ]
     }
   ])
+
+  volumes = [
+    {
+      name = "host_volume"
+      host = {
+        sourcePath = "/mnt"
+      }
+    }
+  ]
 
   requires_compatibilities = ["EC2"]
   network_mode             = "bridge"
