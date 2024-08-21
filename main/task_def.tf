@@ -1,7 +1,7 @@
 resource "aws_ebs_volume" "task_volume" {
   for_each = var.user_node_ids
 
-  availability_zone = "${var.region}b"
+  availability_zone = "${var.region}a"
   size              = 10
   type              = "gp3"
   tags = {
