@@ -4,8 +4,7 @@ phases:
     commands:
       - cd ebs
       - terraform init -backend-config="bucket=rln-${ENV}-terraform-backend" -backend-config="region=us-east-2" -backend-config="key=terraform_backend/${USER_ID}.tfstate"
-      - terraform taint null_resource.detach_volume
-      - terraform apply --auto-approve -var="user_id=${USER_ID}" -var="user_node_ids=${USER_NODE_IDS}" -var="region=us-east-2"
+      - terraform apply --replace=null_resource.detach_volume --auto-approve -var="user_id=${USER_ID}" -var="user_node_ids=${USER_NODE_IDS}" -var="region=us-east-2"
       - cd ../main
       - terraform init -backend-config="bucket=rln-${ENV}-terraform-backend" -backend-config="region=us-east-2" -backend-config="key=terraform_backend/${USER_ID}.tfstate"
       - terraform validate
