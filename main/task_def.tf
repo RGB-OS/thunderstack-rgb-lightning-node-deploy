@@ -9,26 +9,6 @@ resource "aws_ebs_volume" "task_volume" {
   }
 }
 
-resource "null_resource" "detach_volume" {
-  for_each = var.user_node_ids
-
-  provisioner "local-exec" {
-    when    = destroy
-    command = <<EOT
-      VOLUME_ID=$(aws ec2 describe-volumes --filters Name=tag:Name,Values=self.${self.triggers.volume_name} --query "Volumes[0].VolumeId" --output text)
-      if aws ec2 describe-volumes --volume-ids $VOLUME_ID | grep -q "InstanceId"; then
-        aws ec2 detach-volume --volume-id $VOLUME_ID
-      fi
-    EOT
-  }
-
-  triggers = {
-    volume_name = "rln-ebs-${var.user_id}-${each.key}"
-  }
-
-  depends_on = [aws_ebs_volume.task_volume]
-}
-
 resource "aws_ecs_task_definition" "rgb_task" {
   for_each = var.user_node_ids
 
