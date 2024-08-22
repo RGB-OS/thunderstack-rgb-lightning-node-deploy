@@ -14,6 +14,7 @@ resource "aws_ebs_volume" "task_volume" {
 }
 
 resource "null_resource" "detach_volume" {
+  for_each = var.user_node_ids
   provisioner "local-exec" {
     command = <<EOT
       if aws ec2 describe-volumes --volume-ids ${aws_ebs_volume.task_volume[each.key].id} | grep -q "InstanceId"; then
