@@ -11,12 +11,3 @@ terraform {
 provider "aws" {
   region = var.region
 }
-
-data "terraform_remote_state" "vpc" {
-  backend = "s3"
-  config = {
-    bucket = "rgb-infra-vpc-backend"
-    key    = "terraform_backend/terraform.tfstate"
-    region = var.region
-  }
-}
