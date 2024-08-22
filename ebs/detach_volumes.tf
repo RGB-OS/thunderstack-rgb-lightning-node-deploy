@@ -10,6 +10,10 @@ resource "null_resource" "detach_volume" {
       fi
     EOT
   }
+
+  triggers = {
+    always_run = timestamp()
+  }
 }
 
 variable "user_node_ids" {
