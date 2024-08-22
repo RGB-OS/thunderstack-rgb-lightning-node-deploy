@@ -1,21 +1,16 @@
 version: 0.2
 phases:
-  pre_build:
+  build:
     commands:
-      - cd main
+      - cd ebs
+      - terraform init -backend-config="bucket=rln-${ENV}-terraform-backend" -backend-config="region=us-east-2" -backend-config="key=terraform_backend/${USER_ID}.tfstate"
+      - terraform apply --auto-approve -var="user_id=${USER_ID}" -var="user_node_ids=${USER_NODE_IDS}" -var="region=us-east-2"
+      - cd ../main
       - terraform init -backend-config="bucket=rln-${ENV}-terraform-backend" -backend-config="region=us-east-2" -backend-config="key=terraform_backend/${USER_ID}.tfstate"
       - terraform validate
       - terraform plan -var="user_id=${USER_ID}" -var="user_node_ids=${USER_NODE_IDS}" -var="btc_network=${BTC_NETWORK}" -var="btc_rpc=${BTC_RPC}" -var="env=${ENV}" -var="cognito_authorizer_id=${COGNITO_AUTH_ID}" -var="token_authorizer_id=${TOKEN_AUTHORIZER_ID}" -var=docker_image_tag=${DOCKER_IMAGE_TAG}
-      - cd ../ebs
-      - terraform init -backend-config="bucket=rln-${ENV}-terraform-backend" -backend-config="region=us-east-2" -backend-config="key=terraform_backend/${USER_ID}.tfstate"
-      - cd ../deployment
-      - terraform init -backend-config="bucket=rln-${ENV}-terraform-backend" -backend-config="region=us-east-2" -backend-config="key=terraform_backend/${USER_ID}.tfstate"
-  build:
-    commands:
-      - cd ../ebs
-      - terraform apply --auto-approve -var="user_id=${USER_ID}" -var="user_node_ids=${USER_NODE_IDS}" -var="region=us-east-2"
-      - cd ../main
       - terraform apply --auto-approve -var="user_id=${USER_ID}" -var="user_node_ids=${USER_NODE_IDS}" -var="btc_network=${BTC_NETWORK}" -var="btc_rpc=${BTC_RPC}" -var="env=${ENV}" -var="cognito_authorizer_id=${COGNITO_AUTH_ID}" -var="token_authorizer_id=${TOKEN_AUTHORIZER_ID}" -var=docker_image_tag=${DOCKER_IMAGE_TAG} -var="region=us-east-2"
       - cd ../deployment
+      - terraform init -backend-config="bucket=rln-${ENV}-terraform-backend" -backend-config="region=us-east-2" -backend-config="key=terraform_backend/${USER_ID}.tfstate"
       - terraform apply --replace=aws_api_gateway_deployment.deployment --auto-approve -var="region=us-east-2"
       - sleep 30
