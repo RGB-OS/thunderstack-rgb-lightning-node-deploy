@@ -7,27 +7,24 @@ resource "aws_ebs_volume" "task_volume" {
   tags = {
     Name = "rln-ebs-${var.user_id}-${each.key}"
   }
-  lifecycle {
-    prevent_destroy = false
-    create_before_destroy = true
-  }
 }
 
 resource "null_resource" "detach_volume" {
   for_each = var.user_node_ids
-  when    = "destroy"
+
   provisioner "local-exec" {
+    when    = destroy
     command = <<EOT
-      if aws ec2 describe-volumes --volume-ids ${aws_ebs_volume.task_volume[each.key].id} | grep -q "InstanceId"; then
-        aws ec2 detach-volume --volume-id ${aws_ebs_volume.task_volume[each.key].id}
+      VOLUME_ID=$(aws ec2 describe-volumes --filters Name=tag:Name,Values=self.${self.triggers.volume_name} --query "Volumes[0].VolumeId" --output text)
+      if aws ec2 describe-volumes --volume-ids $VOLUME_ID | grep -q "InstanceId"; then
+        aws ec2 detach-volume --volume-id $VOLUME_ID
       fi
     EOT
   }
 
   triggers = {
-    volume_id = aws_ebs_volume.task_volume[each.key].id
+    volume_name = "rln-ebs-${var.user_id}-${each.key}"
   }
-  depends_on = [aws_ebs_volume.task_volume]
 }
 
 resource "aws_ecs_task_definition" "rgb_task" {
