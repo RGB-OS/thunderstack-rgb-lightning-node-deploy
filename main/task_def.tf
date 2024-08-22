@@ -25,6 +25,8 @@ resource "null_resource" "detach_volume" {
   triggers = {
     volume_name = "rln-ebs-${var.user_id}-${each.key}"
   }
+
+  depends_on = [aws_ebs_volume.task_volume]
 }
 
 resource "aws_ecs_task_definition" "rgb_task" {
