@@ -1,21 +1,3 @@
-# Null Resource to Check and Detach the Volume (if attached)
-resource "null_resource" "detach_volume" {
-  provisioner "local-exec" {
-    command = <<EOT
-      if aws ec2 describe-volumes --volume-ids ${aws_ebs_volume.task_volume.id} | grep -q "InstanceId"; then
-        aws ec2 detach-volume --volume-id ${aws_ebs_volume.task_volume.id}
-      fi
-    EOT
-  }
-
-  triggers = {
-    volume_id = aws_ebs_volume.task_volume.id
-  }
-
-  # Ensure detachment is checked before trying to delete the volume
-  depends_on = [aws_ebs_volume.task_volume]
-}
-
 resource "aws_ebs_volume" "task_volume" {
   for_each = var.user_node_ids
 
@@ -29,9 +11,20 @@ resource "aws_ebs_volume" "task_volume" {
     prevent_destroy = false
     create_before_destroy = true
   }
-  depends_on = [
-    null_resource.detach_volume
-  ]
+}
+
+resource "null_resource" "detach_volume" {
+  provisioner "local-exec" {
+    command = <<EOT
+      if aws ec2 describe-volumes --volume-ids ${aws_ebs_volume.task_volume[each.key].id} | grep -q "InstanceId"; then
+        aws ec2 detach-volume --volume-id ${aws_ebs_volume.task_volume[each.key].id}
+      fi
+    EOT
+  }
+
+  triggers = {
+    volume_id = aws_ebs_volume.task_volume[each.key].id
+  }
 }
 
 resource "aws_ecs_task_definition" "rgb_task" {
