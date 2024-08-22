@@ -3,7 +3,7 @@ resource "aws_ebs_volume" "task_volume" {
 
   availability_zone = "${var.region}a"
   size              = 10
-  type              = "gp3"
+  type              = "gp2"
   tags = {
     Name = "rln-ebs-${var.user_id}-${each.key}"
   }
