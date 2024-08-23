@@ -22,8 +22,10 @@ resource "aws_ecs_task_definition" "rgb_task" {
       command      = [
                 "rln-backups",
                 aws_ebs_volume.task_volume[each.key].id,
+                "${var.user_id}",
+                each.key,
                 "${var.btc_rpc}",
-                "/dataldk0/",
+                "/mnt/ebs-${var.user_id}-${each.key}",
                 "--daemon-listening-port",
                 tostring(each.value),
                 "--ldk-peer-listening-port",
