@@ -5,14 +5,14 @@ resource "aws_api_gateway_resource" "user_id_resource" {
 }
 
 resource "aws_api_gateway_resource" "node_id_resource" {
-  for_each = var.user_node_ids
+  for_each    = var.user_node_ids
   rest_api_id = "nvuiiz6k23"
   parent_id   = aws_api_gateway_resource.user_id_resource.id
   path_part   = each.key
 }
 
 resource "aws_api_gateway_resource" "proxy_resource" {
-  for_each = var.user_node_ids
+  for_each    = var.user_node_ids
   rest_api_id = "nvuiiz6k23"
   parent_id   = aws_api_gateway_resource.node_id_resource[each.key].id
   path_part   = "{proxy+}"
@@ -65,6 +65,10 @@ resource "aws_api_gateway_integration_response" "cors_options_integration_respon
     "method.response.header.Access-Control-Allow-Methods" = "'GET,POST,OPTIONS,PUT,DELETE'",
     "method.response.header.Access-Control-Allow-Origin"  = "'*'"
   }
+
+  depends_on = [
+    aws_api_gateway_integration.cors_options_integration  # This ensures that integration is created first
+  ]
 }
 
 resource "aws_api_gateway_method" "proxy_any_method" {
@@ -86,38 +90,14 @@ resource "aws_api_gateway_integration" "nlb_integration" {
   http_method             = aws_api_gateway_method.proxy_any_method[each.key].http_method
   integration_http_method = "ANY"
   type                    = "HTTP_PROXY"
-  uri = "http://vpc-link-nlb-public-1c83ff42632a54a8.elb.us-east-2.amazonaws.com:${each.value}/{proxy}"
+  uri                     = "http://vpc-link-nlb-public-1c83ff42632a54a8.elb.us-east-2.amazonaws.com:${each.value}/{proxy}"
   connection_type         = "VPC_LINK"
   connection_id           = "rf56qp"
   request_parameters = {
     "integration.request.path.proxy" = "method.request.path.proxy"
   }
-}
-
-locals {
-  api_config_hash = sha1(jsonencode({
-    methods      = [for method in aws_api_gateway_method.proxy_any_method : method.id],
-    integrations = [for integration in aws_api_gateway_integration.nlb_integration : integration.id],
-  }))
-}
-
-resource "aws_api_gateway_deployment" "deployment" {
-  rest_api_id = "nvuiiz6k23"
-  stage_name  = "dev"
-
-  description = "Deployment at ${timestamp()}"
-
-  triggers = {
-    redeployment = local.api_config_hash
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
 
   depends_on = [
-    aws_api_gateway_method.proxy_any_method,
-    aws_api_gateway_integration.nlb_integration,
-    aws_api_gateway_integration.cors_options_integration
+    aws_api_gateway_method.proxy_any_method  # This ensures that the method is created first
   ]
 }

@@ -13,10 +13,10 @@ resource "aws_lb_target_group" "target_group" {
   health_check {
     enabled             = true
     protocol            = "TCP"
-    interval            = 30
+    interval            = 5
     timeout             = 5
-    healthy_threshold   = 3
-    unhealthy_threshold = 3
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
   }
 
   tags = {

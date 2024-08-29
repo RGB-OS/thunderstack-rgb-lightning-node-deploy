@@ -1,3 +1,14 @@
+resource "aws_ebs_volume" "task_volume" {
+  for_each = var.user_node_ids
+
+  availability_zone = "${var.region}a"
+  size              = 10
+  type              = "gp2"
+  tags = {
+    Name = "rln-ebs-${var.user_id}-${each.key}"
+  }
+}
+
 resource "aws_ecs_task_definition" "rgb_task" {
   for_each = var.user_node_ids
 
@@ -7,18 +18,21 @@ resource "aws_ecs_task_definition" "rgb_task" {
       name         = "rln-${var.user_id}",
       image        = "${data.terraform_remote_state.vpc.outputs.ecr_repository_url}:${var.docker_image_tag}",
       essential    = true,
-      privileged = true,
+      privileged   = true,
       command      = [
                 "rln-backups",
+                aws_ebs_volume.task_volume[each.key].id,
+                "${var.user_id}",
+                each.key,
                 "${var.btc_rpc}",
-                "/dataldk0/",
+                "/mnt/ebs-${var.user_id}-${each.key}",
                 "--daemon-listening-port",
                 tostring(each.value),
                 "--ldk-peer-listening-port",
                 tostring(min(65535, 9000 + tonumber(each.value))),
                 "--network",
                 "${var.btc_network}"
-            ]
+            ],
       portMappings = [
         {
           containerPort = each.value,
@@ -39,9 +53,21 @@ resource "aws_ecs_task_definition" "rgb_task" {
           awslogs-stream-prefix = "ecs", 
           awslogs-create-group  = "true"
         }
-      }
+      },
+      mountPoints = [
+        {
+          sourceVolume  = "host_volume"
+          containerPath = "/mnt"
+          readOnly      = false
+        }
+      ]
     }
   ])
+
+  volume {
+    name = "host_volume"
+    host_path = "/mnt"
+  }
 
   requires_compatibilities = ["EC2"]
   network_mode             = "bridge"
