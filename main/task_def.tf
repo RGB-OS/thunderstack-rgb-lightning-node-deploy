@@ -59,6 +59,11 @@ resource "aws_ecs_task_definition" "rgb_task" {
           sourceVolume  = "host_volume"
           containerPath = "/mnt"
           readOnly      = false
+        },
+        {
+          sourceVolume  = "host_dev_volume"
+          containerPath = "/dev"
+          readOnly      = false
         }
       ]
     }
@@ -67,6 +72,11 @@ resource "aws_ecs_task_definition" "rgb_task" {
   volume {
     name = "host_volume"
     host_path = "/mnt"
+  }
+
+  volume {
+    name = "host_dev_volume"
+    host_path = "/dev"
   }
 
   requires_compatibilities = ["EC2"]
