@@ -37,7 +37,17 @@ variable "token_authorizer_id" {
 }
 
 variable "docker_image_tag" {
-  description = "Token authorizer ID"
+  description = "Docker image tag"
+  type        = string
+}
+
+variable "docker_healthcheck_image_tag" {
+  description = "Healthcheck docker image tag"
+  type        = string
+}
+
+variable "ecr_healthcheck_repository_url" {
+  description = "Healthcheck docker image repo"
   type        = string
 }
 
