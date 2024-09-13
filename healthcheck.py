@@ -4,8 +4,9 @@ from flask import Flask, jsonify
 
 app = Flask(__name__)
 
-# Store the port value globally (will be set from command line argument)
+# Store the port values globally (will be set from command line arguments)
 port_to_check = None
+flask_bind_port = None
 
 def check_port_health():
     url = f"http://localhost:{port_to_check}"
@@ -40,18 +41,25 @@ def health_check():
         return jsonify({"status": "unhealthy", "code": status_code}), 500
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python healthcheck.py <port>")
+    if len(sys.argv) != 3:
+        print("Usage: python healthcheck.py <port_to_check> <flask_bind_port>")
         sys.exit(1)
 
-    # Get the port from the command-line argument
+    # Get the port to check from the command-line argument
     port_to_check = sys.argv[1]
-
     try:
         port_to_check = int(port_to_check)
     except ValueError:
-        print("Invalid port number.")
+        print("Invalid port number to check.")
         sys.exit(1)
 
-    # Run the Flask app
-    app.run(host="0.0.0.0", port=8080)
+    # Get the Flask bind port from the command-line argument
+    flask_bind_port = sys.argv[2]
+    try:
+        flask_bind_port = int(flask_bind_port)
+    except ValueError:
+        print("Invalid Flask bind port.")
+        sys.exit(1)
+
+    # Run the Flask app on the specified bind port
+    app.run(host="0.0.0.0", port=flask_bind_port)
