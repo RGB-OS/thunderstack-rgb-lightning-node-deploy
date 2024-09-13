@@ -79,7 +79,7 @@ resource "aws_ecs_task_definition" "rgb_task" {
       ],
       memory       = 128,
       cpu          = 128
-      command      = ["python", "healthcheck.py", tostring(each.value)]
+      command      = ["python", "/app/healthcheck.py", tostring(each.value)]
     }
   ])
 
