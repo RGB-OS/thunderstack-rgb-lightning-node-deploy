@@ -80,6 +80,15 @@ resource "aws_ecs_task_definition" "rgb_task" {
       ],
       memory       = 128,
       cpu          = 128
+      logConfiguration = {
+        logDriver = "awslogs",
+        options = {
+          awslogs-group         = "/ecs/rln-${var.user_id}-${each.key}",
+          awslogs-region        = "us-east-2", 
+          awslogs-stream-prefix = "ecs", 
+          awslogs-create-group  = "true"
+        }
+      },
       command = ["-c", "python /app/healthcheck.py ${tostring(each.value)} ${min(65535, 36000 + tonumber(each.value))} rln-${var.user_id}"]
     }
   ])
