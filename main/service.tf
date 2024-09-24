@@ -43,5 +43,7 @@ resource "aws_ecs_service" "rgb_service" {
   tags = {
     user_id = var.user_id
     user_node_id = each.key
+    PUBLICHOSTEDZONE = "peers.thunderstack.org"
+    HOSTEDZONEID = "Z0517355Z7RBMRE6ARC9"
   }
 }
