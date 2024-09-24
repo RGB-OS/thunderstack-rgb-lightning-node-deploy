@@ -70,7 +70,8 @@ resource "aws_ecs_task_definition" "rgb_task" {
     {
       name = "health-check-sidecar",
       image = "${var.ecr_healthcheck_repository_url}:${var.docker_healthcheck_image_tag}",
-      essential = true,
+      essential = false,
+      links        = ["rln-${var.user_id}"],
       portMappings = [
         {
           containerPort = min(65535, 36000 + tonumber(each.value)),
@@ -79,7 +80,7 @@ resource "aws_ecs_task_definition" "rgb_task" {
       ],
       memory       = 128,
       cpu          = 128
-      command = ["-c", "python /app/healthcheck.py ${tostring(each.value)} ${min(65535, 36000 + tonumber(each.value))}"]
+      command = ["-c", "python /app/healthcheck.py ${tostring(each.value)} ${min(65535, 36000 + tonumber(each.value))} rln-${var.user_id}"]
     }
   ])
 
