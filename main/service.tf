@@ -43,10 +43,8 @@ resource "aws_ecs_service" "rgb_service" {
     type = "ECS"
   }
 
-  deployment_configuration {
-    minimum_healthy_percent = 0
-    maximum_percent         = 100
-  }
+  deployment_minimum_healthy_percent = 0
+  deployment_maximum_percent         = 100
 
   tags = {
     user_id      = var.user_id
