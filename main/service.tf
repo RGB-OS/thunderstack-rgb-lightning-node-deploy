@@ -9,7 +9,7 @@ resource "aws_service_discovery_service" "rgb_service_discovery" {
     routing_policy = "MULTIVALUE"
     dns_records {
       type = "SRV"
-      ttl  = 3600
+      ttl  = 60
     }
   }
 
