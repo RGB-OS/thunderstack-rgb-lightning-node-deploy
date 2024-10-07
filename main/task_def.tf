@@ -20,19 +20,19 @@ resource "aws_ecs_task_definition" "rgb_task" {
       essential    = true,
       privileged   = true,
       command      = [
-                "rln-backups",
-                aws_ebs_volume.task_volume[each.key].id,
-                "${var.user_id}",
-                each.key,
-                "${var.btc_rpc}",
-                "/mnt/ebs-${var.user_id}-${each.key}",
-                "--daemon-listening-port",
-                tostring(each.value),
-                "--ldk-peer-listening-port",
-                tostring(min(65535, 9000 + tonumber(each.value))),
-                "--network",
-                "${var.btc_network}"
-            ],
+        "rln-backups",
+        aws_ebs_volume.task_volume[each.key].id,
+        "${var.user_id}",
+        each.key,
+        "${var.btc_rpc}",
+        "/mnt/ebs-${var.user_id}-${each.key}",
+        "--daemon-listening-port",
+        tostring(each.value),
+        "--ldk-peer-listening-port",
+        tostring(min(65535, 9000 + tonumber(each.value))),
+        "--network",
+        "${var.btc_network}"
+      ],
       portMappings = [
         {
           containerPort = each.value,
@@ -48,7 +48,7 @@ resource "aws_ecs_task_definition" "rgb_task" {
       logConfiguration = {
         logDriver = "awslogs",
         options = {
-          awslogs-group         = "/ecs/rln-${var.user_id}-${each.key}"
+          awslogs-group         = "/ecs/rln-${var.user_id}-${each.key}",
           awslogs-region        = "us-east-2", 
           awslogs-stream-prefix = "ecs", 
           awslogs-create-group  = "true"
@@ -56,28 +56,64 @@ resource "aws_ecs_task_definition" "rgb_task" {
       },
       mountPoints = [
         {
-          sourceVolume  = "host_volume"
-          containerPath = "/mnt"
+          sourceVolume  = "host_volume",
+          containerPath = "/mnt",
+          readOnly      = false
+        },
+        {
+          sourceVolume  = "host_dev_volume",
+          containerPath = "/dev",
           readOnly      = false
         }
       ]
+    },
+    {
+      name = "health-check-sidecar",
+      image = "${var.ecr_healthcheck_repository_url}:${var.docker_healthcheck_image_tag}",
+      essential = false,
+      links        = ["rln-${var.user_id}"],
+      portMappings = [
+        {
+          containerPort = min(65535, 36000 + tonumber(each.value)),
+          hostPort      = min(65535, 36000 + tonumber(each.value))
+        }
+      ],
+      memory       = 128,
+      cpu          = 128
+      logConfiguration = {
+        logDriver = "awslogs",
+        options = {
+          awslogs-group         = "/ecs/rln-${var.user_id}-${each.key}",
+          awslogs-region        = "us-east-2", 
+          awslogs-stream-prefix = "ecs", 
+          awslogs-create-group  = "true"
+        }
+      },
+      command = ["-c", "python /app/healthcheck.py ${tostring(each.value)} ${min(65535, 36000 + tonumber(each.value))} rln-${var.user_id}"]
     }
   ])
 
   volume {
-    name = "host_volume"
+    name      = "host_volume"
     host_path = "/mnt"
+  }
+
+  volume {
+    name      = "host_dev_volume"
+    host_path = "/dev"
   }
 
   requires_compatibilities = ["EC2"]
   network_mode             = "bridge"
-  memory                   = 512
-  cpu                      = 512
+  memory                   = 640
+  cpu                      = 640
   execution_role_arn       = "${data.terraform_remote_state.vpc.outputs.ecs_task_execution_role_arn}"
   task_role_arn            = "${data.terraform_remote_state.vpc.outputs.ecs_task_execution_role_arn}"
 
   tags = {
     user_id      = var.user_id
     user_node_id = each.key
+    PUBLICHOSTEDZONE = "peers.thunderstack.org"
+    HOSTEDZONEID = "Z0517355Z7RBMRE6ARC9"
   }
 }

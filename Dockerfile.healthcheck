@@ -1,0 +1,17 @@
+# Use an official Python runtime as a parent image
+FROM python:3.8-slim
+
+# Install basic utilities
+RUN apt-get update && apt-get install -y \
+    curl \
+    unzip \
+    git \
+    jq \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip install flask requests
+
+COPY healthcheck.py /app/healthcheck.py
+
+
+ENTRYPOINT ["/bin/bash"]
