@@ -6,7 +6,6 @@ resource "aws_api_gateway_rest_api" "api_gateway" {
 data "aws_api_gateway_resource" "existing_resource" {
   rest_api_id = "nvuiiz6k23"
   path        = var.user_id
-  parent_id   = "dwpebu"
 }
 
 resource "aws_api_gateway_resource" "user_id_resource" {

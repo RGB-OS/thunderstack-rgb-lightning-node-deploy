@@ -6,7 +6,6 @@ resource "aws_api_gateway_rest_api" "api_gateway_token" {
 data "aws_api_gateway_resource" "existing_resource_token" {
   rest_api_id = "8619bu4cli"
   path        = var.user_id
-  parent_id   = "l97dl58la4"
 }
 
 resource "aws_api_gateway_resource" "user_id_resource_token" {
