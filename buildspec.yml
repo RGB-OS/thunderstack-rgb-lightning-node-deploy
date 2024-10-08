@@ -10,7 +10,7 @@ phases:
           aws ec2 wait volume-available --volume-ids $VOLUME_ID
         fi
       - cd shared
-      - terraform init -backend-config="bucket=rln-${ENV}-terraform-backend" -backend-config="region=us-east-2" -backend-config="key=terraform_backend/${USER_ID}-shared.tfstate
+      - terraform init -backend-config="bucket=rln-${ENV}-terraform-backend" -backend-config="region=us-east-2" -backend-config="key=terraform_backend/${USER_ID}-shared.tfstate"
       - terraform apply --auto-approve -var="user_id=${USER_ID}" 
       - cd main
       - terraform init -backend-config="bucket=rln-${ENV}-terraform-backend" -backend-config="region=us-east-2" -backend-config="key=terraform_backend/${USER_ID}/${NODE_ID}.tfstate"
