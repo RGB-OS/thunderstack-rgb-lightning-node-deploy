@@ -1,5 +1,5 @@
 resource "aws_api_gateway_resource" "user_id_resource" {
-  count = length(aws_api_gateway_rest_api.your_api.resources[*].path | select(. != "415b85e0-a071-70fd-44df-22b911eaa034")) == 0 ? 1 : 0
+  count = contains([for r in aws_api_gateway_rest_api.your_api.resources : r.path_part], "415b85e0-a071-70fd-44df-22b911eaa034") ? 0 : 1
   rest_api_id = "nvuiiz6k23"
   parent_id   = "dwpebu"
   path_part   = "${var.user_id}"
