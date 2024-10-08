@@ -5,7 +5,7 @@ resource "aws_api_gateway_rest_api" "api_gateway_mtls" {
 
 data "aws_api_gateway_resource" "existing_resource_mtls" {
   rest_api_id = "47c4q0dr04"
-  path_part   = var.user_id
+  path        = var.user_id
   parent_id   = "dwpebu"
 }
 
