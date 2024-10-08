@@ -3,14 +3,14 @@ resource "aws_api_gateway_rest_api" "api_gateway_mtls" {
   description = "API for handling requests"
 }
 
-data "aws_api_gateway_resource" "existing_resource" {
+data "aws_api_gateway_resource" "existing_resource_mtls" {
   rest_api_id = "47c4q0dr04"
   path_part   = var.user_id
   parent_id   = "dwpebu"
 }
 
 resource "aws_api_gateway_resource" "user_id_resource_mtls" {
-  count      = length(data.aws_api_gateway_resource.existing_resource.id) == 0 ? 1 : 0
+  count      = length(data.aws_api_gateway_resource.existing_resource_mtls.id) == 0 ? 1 : 0
   rest_api_id = "47c4q0dr04"
   parent_id   = "dwpebu"
   path_part   = "${var.user_id}"

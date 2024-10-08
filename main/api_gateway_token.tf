@@ -3,14 +3,14 @@ resource "aws_api_gateway_rest_api" "api_gateway_token" {
   description = "API for handling requests"
 }
 
-data "aws_api_gateway_resource" "existing_resource" {
+data "aws_api_gateway_resource" "existing_resource_token" {
   rest_api_id = "8619bu4cli"
   path_part   = var.user_id
   parent_id   = "l97dl58la4"
 }
 
 resource "aws_api_gateway_resource" "user_id_resource_token" {
-  count      = length(data.aws_api_gateway_resource.existing_resource.id) == 0 ? 1 : 0
+  count      = length(data.aws_api_gateway_resource.existing_resource_token.id) == 0 ? 1 : 0
   rest_api_id = "8619bu4cli"
   parent_id   = "l97dl58la4"
   path_part   = "${var.user_id}"
