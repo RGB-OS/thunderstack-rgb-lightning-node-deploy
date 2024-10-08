@@ -18,7 +18,7 @@ resource "aws_api_gateway_resource" "user_id_resource_token" {
 resource "aws_api_gateway_resource" "node_id_resource_token" {
   for_each    = var.user_node_ids
   rest_api_id = "8619bu4cli"
-  parent_id   = aws_api_gateway_resource.user_id_resource_token.id
+  parent_id   = aws_api_gateway_resource.user_id_resource_token[count.index].id
   path_part   = each.key
 }
 
