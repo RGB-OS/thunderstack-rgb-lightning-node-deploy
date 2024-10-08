@@ -11,7 +11,7 @@ phases:
         fi
       - cd shared
       - terraform init -backend-config="bucket=rln-${ENV}-terraform-backend" -backend-config="region=us-east-2" -backend-config="key=terraform_backend/${USER_ID}-shared.tfstate"
-      - terraform apply --auto-approve -var="user_id=${USER_ID}" 
+      - terraform apply --auto-approve -var="user_id=${USER_ID}" -var="region=us-east-2"
       - cd main
       - terraform init -backend-config="bucket=rln-${ENV}-terraform-backend" -backend-config="region=us-east-2" -backend-config="key=terraform_backend/${USER_ID}/${NODE_ID}.tfstate"
       - terraform validate
