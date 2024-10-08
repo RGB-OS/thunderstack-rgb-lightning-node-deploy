@@ -2,10 +2,10 @@ version: 0.2
 phases:
   build:
     commands:
-      - if [[ $ACTION == "destroy" ]]; then 
-          USER_NODE={}
+      - if [[ $ACTION == "destroy" ]]; then
+          USER_NODE="{}"
         else
-          USER_NODE={"${NODE_ID}"="${NODE_PORT}"}
+          USER_NODE="{\"${NODE_ID}\"=\"${NODE_PORT}\"}"
         fi
       - VOLUME_ID=$(aws ec2 describe-volumes --filters Name=tag:Name,Values="rln-ebs-${USER_ID}-${NODE_ID}" --query "Volumes[0].VolumeId" --output text)
       - |
