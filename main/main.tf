@@ -2,7 +2,7 @@ data "terraform_remote_state" "other_state" {
   backend = "s3"
 
   config = {
-    bucket = "bucket=rln-${var.env}-terraform-backend"
+    bucket = "rln-${var.env}-terraform-backend"
     key    = "terraform_backend/${var.user_id}-shared.tfstate"
     region = "us-east-2"
   }
