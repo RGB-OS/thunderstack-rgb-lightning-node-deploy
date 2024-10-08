@@ -1,5 +1,10 @@
+resource "aws_api_gateway_rest_api" "api_gateway_mtls" {
+  name        = "AuthorizationAPI mTLS"
+  description = "API for handling requests"
+}
+
 resource "aws_api_gateway_resource" "user_id_resource_mtls" {
-  count = contains([for r in aws_api_gateway_rest_api.your_api.resources : r.path_part], var.user_id) ? 0 : 1
+  count = contains([for r in aws_api_gateway_rest_api.api_gateway_mtls.resources : r.path_part], var.user_id) ? 0 : 1
   rest_api_id = "47c4q0dr04"
   parent_id   = "dwpebu"
   path_part   = "${var.user_id}"
