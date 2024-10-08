@@ -1,24 +1,7 @@
-resource "aws_api_gateway_rest_api" "api_gateway_token" {
-  name        = "AuthorizationAPI Token"
-  description = "API for handling requests"
-}
-
-data "aws_api_gateway_resource" "existing_resource_token" {
-  rest_api_id = "8619bu4cli"
-  path        = var.user_id
-}
-
-resource "aws_api_gateway_resource" "user_id_resource_token" {
-  count      = length(data.aws_api_gateway_resource.existing_resource_token.id) == 0 ? 1 : 0
-  rest_api_id = "8619bu4cli"
-  parent_id   = "l97dl58la4"
-  path_part   = "${var.user_id}"
-}
-
 resource "aws_api_gateway_resource" "node_id_resource_token" {
   for_each    = var.user_node_ids
   rest_api_id = "8619bu4cli"
-  parent_id   = aws_api_gateway_resource.user_id_resource_token[count.index].id
+  parent_id   = data.terraform_remote_state.other_state.outputs.user_id_resource_token_id
   path_part   = each.key
 }
 

@@ -1,4 +1,12 @@
-# Create a load balancer:
+data "terraform_remote_state" "other_state" {
+  backend = "s3"
+
+  config = {
+    bucket = "bucket=rln-${var.env}-terraform-backend"
+    key    = "terraform_backend/${var.user_id}-shared.tfstate"
+    region = "us-east-2"
+  }
+}
 
 # Configure the load balancer with the VPC network
 resource "aws_lb_target_group" "target_group" {

@@ -1,24 +1,7 @@
-resource "aws_api_gateway_rest_api" "api_gateway_mtls" {
-  name        = "AuthorizationAPI mTLS"
-  description = "API for handling requests"
-}
-
-data "aws_api_gateway_resource" "existing_resource_mtls" {
-  rest_api_id = "47c4q0dr04"
-  path        = var.user_id
-}
-
-resource "aws_api_gateway_resource" "user_id_resource_mtls" {
-  count      = length(data.aws_api_gateway_resource.existing_resource_mtls.id) == 0 ? 1 : 0
-  rest_api_id = "47c4q0dr04"
-  parent_id   = "dwpebu"
-  path_part   = "${var.user_id}"
-}
-
 resource "aws_api_gateway_resource" "node_id_resource_mtls" {
   for_each    = var.user_node_ids
   rest_api_id = "47c4q0dr04"
-  parent_id   = aws_api_gateway_resource.user_id_resource_mtls[count.index].id
+  parent_id   = data.terraform_remote_state.other_state.outputs.user_id_resource_mtls_id
   path_part   = each.key
 }
 
