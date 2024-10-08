@@ -14,11 +14,11 @@ phases:
           aws ec2 wait volume-available --volume-ids $VOLUME_ID
         fi
       - cd main
-      - terraform init -backend-config="bucket=rln-${ENV}-terraform-backend" -backend-config="region=us-east-2" -backend-config="key=terraform_backend/${USER_ID}-${NODE_ID}.tfstate"
+      - terraform init -backend-config="bucket=rln-${ENV}-terraform-backend" -backend-config="region=us-east-2" -backend-config="key=terraform_backend/${USER_ID}/${NODE_ID}.tfstate"
       - terraform validate
       - terraform plan -var="user_id=${USER_ID}" -var="user_node_ids=${USER_NODE}" -var="btc_network=${BTC_NETWORK}" -var="btc_rpc=${BTC_RPC}" -var="env=${ENV}" -var="cognito_authorizer_id=${COGNITO_AUTH_ID}" -var="token_authorizer_id=${TOKEN_AUTHORIZER_ID}" -var=docker_image_tag=${DOCKER_IMAGE_TAG} -var=ecr_healthcheck_repository_url=${DOCKER_HEALTHCHECK_IMAGE_REPO} -var=docker_healthcheck_image_tag=${DOCKER_HEALTHCHECK_IMAGE_TAG}
       - terraform apply --auto-approve -var="user_id=${USER_ID}" -var="user_node_ids=${USER_NODE}" -var="btc_network=${BTC_NETWORK}" -var="btc_rpc=${BTC_RPC}" -var="env=${ENV}" -var="cognito_authorizer_id=${COGNITO_AUTH_ID}" -var="token_authorizer_id=${TOKEN_AUTHORIZER_ID}" -var=docker_image_tag=${DOCKER_IMAGE_TAG} -var="region=us-east-2" -var=ecr_healthcheck_repository_url=${DOCKER_HEALTHCHECK_IMAGE_REPO} -var=docker_healthcheck_image_tag=${DOCKER_HEALTHCHECK_IMAGE_TAG}
       - cd ../deployment
-      - terraform init -backend-config="bucket=rln-${ENV}-terraform-backend" -backend-config="region=us-east-2" -backend-config="key=terraform_backend/${USER_ID}-${NODE_ID}.tfstate"
+      - terraform init -backend-config="bucket=rln-${ENV}-terraform-backend" -backend-config="region=us-east-2" -backend-config="key=terraform_backend/${USER_ID}/${NODE_ID}.tfstate"
       - terraform apply --replace=aws_api_gateway_deployment.deployment --auto-approve
       - sleep 30
