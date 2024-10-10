@@ -3,7 +3,7 @@ phases:
   build:
     commands:
       - if [[ $ACTION == "destroy" ]]; then USER_NODE="{}"; else USER_NODE="{\"${NODE_ID}\"=\"${NODE_PORT}\"}"; fi
-      - echo 'USER_NODE ${USER_NODE}'
+      - echo "USER_NODE ${USER_NODE}"
       - VOLUME_ID=$(aws ec2 describe-volumes --filters Name=tag:Name,Values="rln-ebs-${USER_ID}-${NODE_ID}" --query "Volumes[0].VolumeId" --output text)
       - |
         if aws ec2 describe-volumes --volume-ids $VOLUME_ID | grep -q "InstanceId"; then
