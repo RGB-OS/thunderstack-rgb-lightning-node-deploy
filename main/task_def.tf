@@ -24,7 +24,6 @@ resource "aws_ecs_task_definition" "rgb_task" {
         aws_ebs_volume.task_volume[each.key].id,
         "${var.user_id}",
         each.key,
-        "${var.btc_rpc}",
         "/mnt/ebs-${var.user_id}-${each.key}",
         "--daemon-listening-port",
         tostring(each.value),
