@@ -51,6 +51,21 @@ variable "ecr_healthcheck_repository_url" {
   type        = string
 }
 
+variable "network_load_balancer_arn" {
+  description = "Network Load Balancer ARN"
+  type        = string
+}
+
+variable "network_load_balancer_url" {
+  description = "Network Load Balancer URL"
+  type        = string
+}
+
+variable "api_gateway_vpclink_id" {
+  description = "API Gateway VPC Link ID"
+  type        = string
+}
+
 variable "user_node_ids" {
   description = "Map of user node IDs to their respective ports"
   type = map(number)
