@@ -54,19 +54,19 @@ variable "ecr_healthcheck_repository_url" {
 variable "network_load_balancer_arn" {
   description = "Network Load Balancer ARN"
   type        = string
-  default = ""
+  default     = "arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public/1c83ff42632a54a8"
 }
 
-variable "network_load_balancer_url" {
-  description = "Network Load Balancer URL"
+variable "network_load_balancer_dns" {
+  description = "Network Load Balancer DNS"
   type        = string
-  default = ""
+  default     = "vpc-link-nlb-public-1c83ff42632a54a8.elb.us-east-2.amazonaws.com"
 }
 
 variable "api_gateway_vpclink_id" {
   description = "API Gateway VPC Link ID"
   type        = string
-  default = ""
+  default     = "rf56qp"
 }
 
 variable "user_node_ids" {

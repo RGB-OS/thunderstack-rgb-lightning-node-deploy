@@ -37,7 +37,7 @@ resource "aws_lb_target_group" "target_group" {
 resource "aws_lb_listener" "listener" {
   for_each = var.user_node_ids
 
-  load_balancer_arn = "arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public/1c83ff42632a54a8"
+  load_balancer_arn = var.network_load_balancer_arn
   port              = each.value
   protocol          = "TCP" 
   default_action {
