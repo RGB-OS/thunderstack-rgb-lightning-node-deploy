@@ -104,8 +104,8 @@ resource "aws_ecs_task_definition" "rgb_task" {
 
   requires_compatibilities = ["EC2"]
   network_mode             = "bridge"
-  memory                   = 640
-  cpu                      = 640
+  memory                   = 896
+  cpu                      = 512
   execution_role_arn       = "${data.terraform_remote_state.vpc.outputs.ecs_task_execution_role_arn}"
   task_role_arn            = "${data.terraform_remote_state.vpc.outputs.ecs_task_execution_role_arn}"
 
