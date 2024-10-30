@@ -6,35 +6,56 @@ phases:
       - if [ "$ACTION" = "destroy" ]; then USER_NODE="{}"; else
         USER_NODE="{\"${NODE_ID}\"=\"${NODE_PORT}\"}"; fi
       - echo "USER_NODE ${USER_NODE}"
+      - export TFSTATE_PATH="s3://rln-test-terraform-backend/terraform_backend/${USER_ID}/${NODE_ID}.tfstate"
       - >
-        LB1_LISTENERS=$(aws elbv2 describe-listeners --load-balancer-arn
-        arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public/1c83ff42632a54a8
-        --query "Listeners | length(@)" --output text)
+       if aws s3 ls "$TFSTATE_PATH" > /dev/null 2>&1; then
+          echo "tfstate file found. Downloading and parsing..."
+          
+          # Download the .tfstate file
+          aws s3 cp "$TFSTATE_PATH" ./node.tfstate
+          
+          # Parse required values using jq
+          LB_ARN=$(jq -r '.resources[] | select(.type=="terraform_remote_state") | .instances[].attributes.outputs.value.network_load_balancer_arn' node.tfstate)
+          LB_DNS=$(jq -r '.resources[] | select(.type=="terraform_remote_state") | .instances[].attributes.outputs.value.network_load_balancer_dns_name' node.tfstate)
+          VPC_LINK_ID=$(jq -r '.resources[] | select(.type=="terraform_remote_state") | .instances[].attributes.outputs.value.vpc_link_id' node.tfstate)
+          
+          # Set to defaults if parsed values are empty
+          CHOSEN_LB_ARN=${LB_ARN:-$DEFAULT_LB_ARN}
+          CHOSEN_LB_DNS=${LB_DNS:-$DEFAULT_LB_DNS}
+          CHOSEN_LB_ID=${VPC_LINK_ID:-$DEFAULT_LB_ID}
+          
+          # Cleanup downloaded file
+          rm -f node.tfstate
+       else
+          LB1_LISTENERS=$(aws elbv2 describe-listeners --load-balancer-arn
+          arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public/1c83ff42632a54a8
+          --query "Listeners | length(@)" --output text)
 
-        LB2_LISTENERS=$(aws elbv2 describe-listeners --load-balancer-arn arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public-2/c83eb6aa70e6aec9 --query "Listeners | length(@)" --output text)
+          LB2_LISTENERS=$(aws elbv2 describe-listeners --load-balancer-arn arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public-2/c83eb6aa70e6aec9 --query "Listeners | length(@)" --output text)
 
-        LB3_LISTENERS=$(aws elbv2 describe-listeners --load-balancer-arn arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public-3/c5fe8631053259f3 --query "Listeners | length(@)" --output text)
+          LB3_LISTENERS=$(aws elbv2 describe-listeners --load-balancer-arn arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public-3/c5fe8631053259f3 --query "Listeners | length(@)" --output text)
 
-        LB4_LISTENERS=$(aws elbv2 describe-listeners --load-balancer-arn arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public-4/99b41a4daf28069d --query "Listeners | length(@)" --output text)
+          LB4_LISTENERS=$(aws elbv2 describe-listeners --load-balancer-arn arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public-4/99b41a4daf28069d --query "Listeners | length(@)" --output text)
 
 
-        if [ "$LB1_LISTENERS" -le 48 ]; then
-          CHOSEN_LB_ARN="arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public/1c83ff42632a54a8";
-          CHOSEN_LB_DNS="vpc-link-nlb-public-1c83ff42632a54a8.elb.us-east-2.amazonaws.com";
-          CHOSEN_LB_ID="rf56qp";
-        elif [ "$LB2_LISTENERS" -le 48 ]; then
-          CHOSEN_LB_ARN="arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public-2/c83eb6aa70e6aec9";
-          CHOSEN_LB_DNS="vpc-link-nlb-public-2-c83eb6aa70e6aec9.elb.us-east-2.amazonaws.com";
-          CHOSEN_LB_ID="z4wm6y";
-        elif [ "$LB3_LISTENERS" -le 48 ]; then
-          CHOSEN_LB_ARN="arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public-3/c5fe8631053259f3";
-          CHOSEN_LB_DNS="vpc-link-nlb-public-3-c5fe8631053259f3.elb.us-east-2.amazonaws.com";
-          CHOSEN_LB_ID="i6hhpe";
-        else
-          CHOSEN_LB_ARN="arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public-4/99b41a4daf28069d";
-          CHOSEN_LB_DNS="vpc-link-nlb-public-4-99b41a4daf28069d.elb.us-east-2.amazonaws.com";
-          CHOSEN_LB_ID="o98iws";
-        fi
+          if [ "$LB1_LISTENERS" -le 48 ]; then
+            CHOSEN_LB_ARN="arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public/1c83ff42632a54a8";
+            CHOSEN_LB_DNS="vpc-link-nlb-public-1c83ff42632a54a8.elb.us-east-2.amazonaws.com";
+            CHOSEN_LB_ID="rf56qp";
+          elif [ "$LB2_LISTENERS" -le 48 ]; then
+            CHOSEN_LB_ARN="arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public-2/c83eb6aa70e6aec9";
+            CHOSEN_LB_DNS="vpc-link-nlb-public-2-c83eb6aa70e6aec9.elb.us-east-2.amazonaws.com";
+            CHOSEN_LB_ID="z4wm6y";
+          elif [ "$LB3_LISTENERS" -le 48 ]; then
+            CHOSEN_LB_ARN="arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public-3/c5fe8631053259f3";
+            CHOSEN_LB_DNS="vpc-link-nlb-public-3-c5fe8631053259f3.elb.us-east-2.amazonaws.com";
+            CHOSEN_LB_ID="i6hhpe";
+          else
+            CHOSEN_LB_ARN="arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public-4/99b41a4daf28069d";
+            CHOSEN_LB_DNS="vpc-link-nlb-public-4-99b41a4daf28069d.elb.us-east-2.amazonaws.com";
+            CHOSEN_LB_ID="o98iws";
+          fi
+       fi
       - export TF_VAR_network_load_balancer_arn=$CHOSEN_LB_ARN
       - export TF_VAR_network_load_balancer_dns=$CHOSEN_LB_DNS
       - export TF_VAR_api_gateway_vpclink_id=$CHOSEN_LB_ID
