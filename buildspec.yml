@@ -1,15 +1,22 @@
+---
 version: 0.2
 phases:
   build:
     commands:
-      - if [ "$ACTION" = "destroy" ]; then USER_NODE="{}"; else USER_NODE="{\"${NODE_ID}\"=\"${NODE_PORT}\"}"; fi
+      - if [ "$ACTION" = "destroy" ]; then USER_NODE="{}"; else
+        USER_NODE="{\"${NODE_ID}\"=\"${NODE_PORT}\"}"; fi
       - echo "USER_NODE ${USER_NODE}"
-      
-      - |
-        LB1_LISTENERS=$(aws elbv2 describe-listeners --load-balancer-arn arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public/1c83ff42632a54a8 --query "Listeners | length(@)" --output text)
+      - >
+        LB1_LISTENERS=$(aws elbv2 describe-listeners --load-balancer-arn
+        arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public/1c83ff42632a54a8
+        --query "Listeners | length(@)" --output text)
+
         LB2_LISTENERS=$(aws elbv2 describe-listeners --load-balancer-arn arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public-2/c83eb6aa70e6aec9 --query "Listeners | length(@)" --output text)
+
         LB3_LISTENERS=$(aws elbv2 describe-listeners --load-balancer-arn arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public-3/c5fe8631053259f3 --query "Listeners | length(@)" --output text)
+
         LB4_LISTENERS=$(aws elbv2 describe-listeners --load-balancer-arn arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public-4/99b41a4daf28069d --query "Listeners | length(@)" --output text)
+
 
         if [ "$LB1_LISTENERS" -le 48 ]; then
           CHOSEN_LB_ARN="arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public/1c83ff42632a54a8";
@@ -28,29 +35,55 @@ phases:
           CHOSEN_LB_DNS="vpc-link-nlb-public-4-99b41a4daf28069d.elb.us-east-2.amazonaws.com";
           CHOSEN_LB_ID="o98iws";
         fi
-
-      - echo "Using Load Balancer: $CHOSEN_LB_ARN with DNS: $CHOSEN_LB_DNS and ID: $CHOSEN_LB_ID"
       - export TF_VAR_network_load_balancer_arn=$CHOSEN_LB_ARN
       - export TF_VAR_network_load_balancer_dns=$CHOSEN_LB_DNS
       - export TF_VAR_api_gateway_vpclink_id=$CHOSEN_LB_ID
-
-      - VOLUME_ID=$(aws ec2 describe-volumes --filters Name=tag:Name,Values="rln-ebs-${USER_ID}-${NODE_ID}" --query "Volumes[0].VolumeId" --output text)
-      - |
-        if aws ec2 describe-volumes --volume-ids $VOLUME_ID | grep -q "InstanceId"; then
+      - VOLUME_ID=$(aws ec2 describe-volumes --filters
+        Name=tag:Name,Values="rln-ebs-${USER_ID}-${NODE_ID}" --query
+        "Volumes[0].VolumeId" --output text)
+      - >
+        if aws ec2 describe-volumes --volume-ids $VOLUME_ID | grep -q
+        "InstanceId"; then
           aws ec2 detach-volume --volume-id $VOLUME_ID
           aws ec2 wait volume-available --volume-ids $VOLUME_ID
         fi
       - cd shared
       - terraform providers lock
-      - terraform init -backend-config="bucket=rln-${ENV}-terraform-backend" -backend-config="region=us-east-2" -backend-config="key=terraform_backend/${USER_ID}-shared.tfstate"
-      - terraform apply --auto-approve -var="user_id=${USER_ID}" -var="region=us-east-2"
+      - terraform init -backend-config="bucket=rln-${ENV}-terraform-backend"
+        -backend-config="region=us-east-2"
+        -backend-config="key=terraform_backend/${USER_ID}-shared.tfstate"
+      - terraform apply --auto-approve -var="user_id=${USER_ID}"
+        -var="region=us-east-2"
       - cd ../main
       - terraform providers lock
-      - terraform init -backend-config="bucket=rln-${ENV}-terraform-backend" -backend-config="region=us-east-2" -backend-config="key=terraform_backend/${USER_ID}/${NODE_ID}.tfstate"
+      - terraform init -backend-config="bucket=rln-${ENV}-terraform-backend"
+        -backend-config="region=us-east-2"
+        -backend-config="key=terraform_backend/${USER_ID}/${NODE_ID}.tfstate"
       - terraform validate
-      - terraform plan -var="user_id=${USER_ID}" -var="user_node_ids=${USER_NODE}" -var="btc_network=${BTC_NETWORK}" -var="btc_rpc=${BTC_RPC}" -var="env=${ENV}" -var="cognito_authorizer_id=${COGNITO_AUTH_ID}" -var="token_authorizer_id=${TOKEN_AUTHORIZER_ID}" -var=docker_image_tag=${DOCKER_IMAGE_TAG} -var=ecr_healthcheck_repository_url=${DOCKER_HEALTHCHECK_IMAGE_REPO} -var=docker_healthcheck_image_tag=${DOCKER_HEALTHCHECK_IMAGE_TAG} -var=network_load_balancer_arn=${CHOSEN_LB_ARN} -var=network_load_balancer_dns=${CHOSEN_LB_DNS} -var=api_gateway_vpclink_id=${CHOSEN_LB_ID}
-      - terraform apply --auto-approve -var="user_id=${USER_ID}" -var="user_node_ids=${USER_NODE}" -var="btc_network=${BTC_NETWORK}" -var="btc_rpc=${BTC_RPC}" -var="env=${ENV}" -var="cognito_authorizer_id=${COGNITO_AUTH_ID}" -var="token_authorizer_id=${TOKEN_AUTHORIZER_ID}" -var=docker_image_tag=${DOCKER_IMAGE_TAG} -var="region=us-east-2" -var=ecr_healthcheck_repository_url=${DOCKER_HEALTHCHECK_IMAGE_REPO} -var=docker_healthcheck_image_tag=${DOCKER_HEALTHCHECK_IMAGE_TAG} -var=network_load_balancer_arn=${CHOSEN_LB_ARN} -var=network_load_balancer_dns=${CHOSEN_LB_DNS} -var=api_gateway_vpclink_id=${CHOSEN_LB_ID}
+      - terraform plan -var="user_id=${USER_ID}"
+        -var="user_node_ids=${USER_NODE}" -var="btc_network=${BTC_NETWORK}"
+        -var="btc_rpc=${BTC_RPC}" -var="env=${ENV}"
+        -var="cognito_authorizer_id=${COGNITO_AUTH_ID}"
+        -var="token_authorizer_id=${TOKEN_AUTHORIZER_ID}"
+        -var=docker_image_tag=${DOCKER_IMAGE_TAG}
+        -var=ecr_healthcheck_repository_url=${DOCKER_HEALTHCHECK_IMAGE_REPO}
+        -var=docker_healthcheck_image_tag=${DOCKER_HEALTHCHECK_IMAGE_TAG}
+        -var=network_load_balancer_arn=${CHOSEN_LB_ARN}
+        -var=network_load_balancer_dns=${CHOSEN_LB_DNS}
+        -var=api_gateway_vpclink_id=${CHOSEN_LB_ID}
+      - terraform apply --auto-approve -var="user_id=${USER_ID}"
+        -var="user_node_ids=${USER_NODE}" -var="btc_network=${BTC_NETWORK}"
+        -var="btc_rpc=${BTC_RPC}" -var="env=${ENV}"
+        -var="cognito_authorizer_id=${COGNITO_AUTH_ID}"
+        -var="token_authorizer_id=${TOKEN_AUTHORIZER_ID}"
+        -var=docker_image_tag=${DOCKER_IMAGE_TAG} -var="region=us-east-2"
+        -var=ecr_healthcheck_repository_url=${DOCKER_HEALTHCHECK_IMAGE_REPO}
+        -var=docker_healthcheck_image_tag=${DOCKER_HEALTHCHECK_IMAGE_TAG}
+        -var=network_load_balancer_arn=${CHOSEN_LB_ARN}
+        -var=network_load_balancer_dns=${CHOSEN_LB_DNS}
+        -var=api_gateway_vpclink_id=${CHOSEN_LB_ID}
       - cd ../deployment
       - terraform providers lock
       - terraform init
-      - terraform apply --replace=aws_api_gateway_deployment.deployment --auto-approve
+      - terraform apply --replace=aws_api_gateway_deployment.deployment
+        --auto-approve
