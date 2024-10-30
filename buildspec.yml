@@ -5,7 +5,6 @@ phases:
       - if [ "$ACTION" = "destroy" ]; then USER_NODE="{}"; else USER_NODE="{\"${NODE_ID}\"=\"${NODE_PORT}\"}"; fi
       - echo "USER_NODE ${USER_NODE}"
       
-      # Step 1: Get the count of listeners for each load balancer
       - |
         LB1_LISTENERS=$(aws elbv2 describe-listeners --load-balancer-arn arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public/1c83ff42632a54a8 --query "Listeners | length(@)" --output text)
         LB2_LISTENERS=$(aws elbv2 describe-listeners --load-balancer-arn arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public-2/c83eb6aa70e6aec9 --query "Listeners | length(@)" --output text)
@@ -31,13 +30,11 @@ phases:
           CHOSEN_LB_ID="o98iws";
         fi
 
-      # Step 3: Pass the selected load balancer values to Terraform
       - echo "Using Load Balancer: $CHOSEN_LB_ARN with DNS: $CHOSEN_LB_DNS and ID: $CHOSEN_LB_ID"
       - export TF_VAR_network_load_balancer_arn=$CHOSEN_LB_ARN
       - export TF_VAR_network_load_balancer_dns=$CHOSEN_LB_DNS
       - export TF_VAR_api_gateway_vpclink_id=$CHOSEN_LB_ID
 
-      # Continue with existing Terraform commands
       - VOLUME_ID=$(aws ec2 describe-volumes --filters Name=tag:Name,Values="rln-ebs-${USER_ID}-${NODE_ID}" --query "Volumes[0].VolumeId" --output text)
       - |
         if aws ec2 describe-volumes --volume-ids $VOLUME_ID | grep -q "InstanceId"; then
