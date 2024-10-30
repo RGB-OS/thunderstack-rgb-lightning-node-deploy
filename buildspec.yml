@@ -6,13 +6,14 @@ phases:
       - echo "USER_NODE ${USER_NODE}"
       
       # Step 1: Get the count of listeners for each load balancer
-      - LB1_LISTENERS=$(aws elbv2 describe-listeners --load-balancer-arn arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public/1c83ff42632a54a8 --query "Listeners | length(@)" --output text)
-      - LB2_LISTENERS=$(aws elbv2 describe-listeners --load-balancer-arn arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public-2/c83eb6aa70e6aec9 --query "Listeners | length(@)" --output text)
-      - LB3_LISTENERS=$(aws elbv2 describe-listeners --load-balancer-arn arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public-3/c5fe8631053259f3 --query "Listeners | length(@)" --output text)
-      - LB4_LISTENERS=$(aws elbv2 describe-listeners --load-balancer-arn arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public-4/99b41a4daf28069d --query "Listeners | length(@)" --output text)
+      - |
+        LB1_LISTENERS=$(aws elbv2 describe-listeners --load-balancer-arn arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public/1c83ff42632a54a8 --query "Listeners | length(@)" --output text)
+        LB2_LISTENERS=$(aws elbv2 describe-listeners --load-balancer-arn arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public-2/c83eb6aa70e6aec9 --query "Listeners | length(@)" --output text)
+        LB3_LISTENERS=$(aws elbv2 describe-listeners --load-balancer-arn arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public-3/c5fe8631053259f3 --query "Listeners | length(@)" --output text)
+        LB4_LISTENERS=$(aws elbv2 describe-listeners --load-balancer-arn arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public-4/99b41a4daf28069d --query "Listeners | length(@)" --output text)
 
-      # Step 2: Determine the appropriate load balancer based on listener counts
-      - if [ "$LB1_LISTENERS" -le 48 ]; then
+        # Step 2: Determine the appropriate load balancer based on listener counts
+        if [ "$LB1_LISTENERS" -le 48 ]; then
           CHOSEN_LB_ARN="arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public/1c83ff42632a54a8";
           CHOSEN_LB_DNS="vpc-link-nlb-public-1c83ff42632a54a8.elb.us-east-2.amazonaws.com";
           CHOSEN_LB_ID="rf56qp";
