@@ -7,6 +7,9 @@ phases:
         USER_NODE="{\"${NODE_ID}\"=\"${NODE_PORT}\"}"; fi
       - echo "USER_NODE ${USER_NODE}"
       - export TFSTATE_PATH="s3://rln-test-terraform-backend/terraform_backend/${USER_ID}/${NODE_ID}.tfstate"
+      - export DEFAULT_LB_ARN="arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public/1c83ff42632a54a8"
+      - export DEFAULT_LB_DNS="vpc-link-nlb-public-1c83ff42632a54a8.elb.us-east-2.amazonaws.com"
+      - export DEFAULT_LB_ID="rf56qp"
       - >
        if aws s3 ls "$TFSTATE_PATH" > /dev/null 2>&1; then
           echo "tfstate file found. Downloading and parsing..."
@@ -18,14 +21,13 @@ phases:
           LB_ARN=$(jq -r '.resources[] | select(.type=="terraform_remote_state") | .instances[].attributes.outputs.value.network_load_balancer_arn' node.tfstate)
           LB_DNS=$(jq -r '.resources[] | select(.type=="terraform_remote_state") | .instances[].attributes.outputs.value.network_load_balancer_dns_name' node.tfstate)
           VPC_LINK_ID=$(jq -r '.resources[] | select(.type=="terraform_remote_state") | .instances[].attributes.outputs.value.vpc_link_id' node.tfstate)
-          
+          echo $LB_ARN
+          echo $LB_DNS
+          echo $VPC_LINK_ID
           # Set to defaults if parsed values are empty
           CHOSEN_LB_ARN=${LB_ARN:-$DEFAULT_LB_ARN}
           CHOSEN_LB_DNS=${LB_DNS:-$DEFAULT_LB_DNS}
           CHOSEN_LB_ID=${VPC_LINK_ID:-$DEFAULT_LB_ID}
-          echo $CHOSEN_LB_ARN
-          echo $CHOSEN_LB_DNS
-          echo $CHOSEN_LB_ID
           # Cleanup downloaded file
           rm -f node.tfstate
        else
