@@ -23,7 +23,9 @@ phases:
           CHOSEN_LB_ARN=${LB_ARN:-$DEFAULT_LB_ARN}
           CHOSEN_LB_DNS=${LB_DNS:-$DEFAULT_LB_DNS}
           CHOSEN_LB_ID=${VPC_LINK_ID:-$DEFAULT_LB_ID}
-          
+          echo $CHOSEN_LB_ARN
+          echo $CHOSEN_LB_DNS
+          echo $CHOSEN_LB_ID
           # Cleanup downloaded file
           rm -f node.tfstate
        else
