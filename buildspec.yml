@@ -18,9 +18,10 @@ phases:
           aws s3 cp "$TFSTATE_PATH" ./node.tfstate
           
           # Parse required values using jq
-          LB_ARN=$(jq -r '.resources[] | select(.type=="terraform_remote_state") | .instances[].attributes.outputs.value.network_load_balancer_arn' node.tfstate)
-          LB_DNS=$(jq -r '.resources[] | select(.type=="terraform_remote_state") | .instances[].attributes.outputs.value.network_load_balancer_dns_name' node.tfstate)
-          VPC_LINK_ID=$(jq -r '.resources[] | select(.type=="terraform_remote_state") | .instances[].attributes.outputs.value.vpc_link_id' node.tfstate)
+          LB_ARN=$(jq -r '.resources[] | select(.type=="terraform_remote_state") | .instances[].attributes.outputs.value.network_load_balancer_arn | select(. != null)' node.tfstate)
+          LB_DNS=$(jq -r '.resources[] | select(.type=="terraform_remote_state") | .instances[].attributes.outputs.value.network_load_balancer_dns_name | select(. != null)' node.tfstate)
+          VPC_LINK_ID=$(jq -r '.resources[] | select(.type=="terraform_remote_state") | .instances[].attributes.outputs.value.vpc_link_id | select(. != null)' node.tfstate)
+
           echo $LB_ARN
           echo $LB_DNS
           echo $VPC_LINK_ID
