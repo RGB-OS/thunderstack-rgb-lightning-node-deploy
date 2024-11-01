@@ -42,8 +42,8 @@ resource "aws_ecs_task_definition" "rgb_task" {
           hostPort      = min(65535, 9000 + tonumber(each.value))
         }
       ],
-      memory       = 512,
-      cpu          = 512,
+      memory       = 768,
+      cpu          = 448,
       logConfiguration = {
         logDriver = "awslogs",
         options = {
@@ -78,7 +78,7 @@ resource "aws_ecs_task_definition" "rgb_task" {
         }
       ],
       memory       = 128,
-      cpu          = 128
+      cpu          = 64
       logConfiguration = {
         logDriver = "awslogs",
         options = {
@@ -104,8 +104,8 @@ resource "aws_ecs_task_definition" "rgb_task" {
 
   requires_compatibilities = ["EC2"]
   network_mode             = "bridge"
-  memory                   = 640
-  cpu                      = 640
+  memory                   = 896
+  cpu                      = 512
   execution_role_arn       = "${data.terraform_remote_state.vpc.outputs.ecs_task_execution_role_arn}"
   task_role_arn            = "${data.terraform_remote_state.vpc.outputs.ecs_task_execution_role_arn}"
 

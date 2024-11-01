@@ -84,9 +84,9 @@ resource "aws_api_gateway_integration" "nlb_integration" {
   http_method             = aws_api_gateway_method.proxy_any_method[each.key].http_method
   integration_http_method = "ANY"
   type                    = "HTTP_PROXY"
-  uri                     = "http://vpc-link-nlb-public-1c83ff42632a54a8.elb.us-east-2.amazonaws.com:${each.value}/{proxy}"
+  uri                     = "http://${var.network_load_balancer_dns}:${each.value}/{proxy}"
   connection_type         = "VPC_LINK"
-  connection_id           = "rf56qp"
+  connection_id           = var.api_gateway_vpclink_id
   request_parameters = {
     "integration.request.path.proxy" = "method.request.path.proxy"
   }
