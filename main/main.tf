@@ -27,7 +27,7 @@ resource "aws_lb_target_group" "target_group" {
     unhealthy_threshold = 2
   }
   
-  deregistration_delay  = true
+  deregistration_delay  = 0
 
   tags = {
     user_id      = var.user_id
