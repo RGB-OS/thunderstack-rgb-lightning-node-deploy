@@ -2,8 +2,13 @@ version: 0.2
 phases:
   build:
     commands:
-      - if [ "$ACTION" = "destroy" ]; then USER_NODE="{}"; else USER_NODE="{\"${NODE_ID}\"=\"${NODE_PORT}\"}"; fi
-      - echo "USER_NODE: ${USER_NODE}"
+      - |
+        if [ "$ACTION" = "destroy" ]; then 
+          USER_NODE="{}"
+        else 
+          USER_NODE="{\"${NODE_ID}\"=\"${NODE_PORT}\"}"
+        fi
+        echo "USER_NODE: ${USER_NODE}"
       - export TFSTATE_PATH="s3://rln-test-terraform-backend/terraform_backend/${USER_ID}/${NODE_ID}.tfstate"
       - export DEFAULT_LB_ARN="arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public/1c83ff42632a54a8"
       - export DEFAULT_LB_DNS="vpc-link-nlb-public-1c83ff42632a54a8.elb.us-east-2.amazonaws.com"
