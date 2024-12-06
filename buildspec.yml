@@ -2,53 +2,33 @@ version: 0.2
 phases:
   build:
     commands:
-      # Initialize USER_NODE based on ACTION
       - if [ "$ACTION" = "destroy" ]; then USER_NODE="{}"; else USER_NODE="{\"${NODE_ID}\"=\"${NODE_PORT}\"}"; fi
       - echo "USER_NODE: ${USER_NODE}"
-
-      # Set up environment variables
       - export TFSTATE_PATH="s3://rln-test-terraform-backend/terraform_backend/${USER_ID}/${NODE_ID}.tfstate"
       - export DEFAULT_LB_ARN="arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public/1c83ff42632a54a8"
       - export DEFAULT_LB_DNS="vpc-link-nlb-public-1c83ff42632a54a8.elb.us-east-2.amazonaws.com"
       - export DEFAULT_LB_ID="rf56qp"
-
-      # Check for the tfstate file and process it
       - |
         if aws s3 ls "$TFSTATE_PATH" > /dev/null 2>&1; then
           echo "tfstate file found. Downloading and parsing..."
-          
-          # Download the .tfstate file
           aws s3 cp "$TFSTATE_PATH" ./node.tfstate
-          
-          # Parse required values using jq
           LB_ARN=$(jq -r '.outputs.value.network_load_balancer_arn | select(. != null)' node.tfstate)
           LB_DNS=$(jq -r '.outputs.value.network_load_balancer_dns_name | select(. != null)' node.tfstate)
           VPC_LINK_ID=$(jq -r '.outputs.value.vpc_link_id | select(. != null)' node.tfstate)
-
           echo "LB_ARN: $LB_ARN"
           echo "LB_DNS: $LB_DNS"
           echo "VPC_LINK_ID: $VPC_LINK_ID"
-
-          # Set defaults if parsed values are empty
           CHOSEN_LB_ARN=${LB_ARN:-$DEFAULT_LB_ARN}
           CHOSEN_LB_DNS=${LB_DNS:-$DEFAULT_LB_DNS}
           CHOSEN_LB_ID=${VPC_LINK_ID:-$DEFAULT_LB_ID}
-
-          # Cleanup
           rm -f node.tfstate
         else
           echo "tfstate file not found. Checking NLB listener counts..."
-          
-          # Define listener limits
           MAX_LISTENERS=48
-
-          # Query listeners for each load balancer
           LB1_LISTENERS=$(aws elbv2 describe-listeners --load-balancer-arn "$DEFAULT_LB_ARN" --query "Listeners | length(@)" --output text || echo 0)
           LB2_LISTENERS=$(aws elbv2 describe-listeners --load-balancer-arn "arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public-2/c83eb6aa70e6aec9" --query "Listeners | length(@)" --output text || echo 0)
           LB3_LISTENERS=$(aws elbv2 describe-listeners --load-balancer-arn "arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public-3/c5fe8631053259f3" --query "Listeners | length(@)" --output text || echo 0)
           LB4_LISTENERS=$(aws elbv2 describe-listeners --load-balancer-arn "arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public-4/99b41a4daf28069d" --query "Listeners | length(@)" --output text || echo 0)
-
-          # Select the load balancer with available capacity
           if [ "$LB1_LISTENERS" -le "$MAX_LISTENERS" ]; then
             CHOSEN_LB_ARN="$DEFAULT_LB_ARN"
             CHOSEN_LB_DNS="$DEFAULT_LB_DNS"
@@ -67,13 +47,9 @@ phases:
             CHOSEN_LB_ID="o98iws"
           fi
         fi
-
-      # Export chosen values for Terraform
       - export TF_VAR_network_load_balancer_arn=$CHOSEN_LB_ARN
       - export TF_VAR_network_load_balancer_dns=$CHOSEN_LB_DNS
       - export TF_VAR_api_gateway_vpclink_id=$CHOSEN_LB_ID
-
-      # Handle EBS volume detachment
       - |
         VOLUME_ID=$(aws ec2 describe-volumes --filters Name=tag:Name,Values="rln-ebs-${USER_ID}-${NODE_ID}" --query "Volumes[0].VolumeId" --output text)
         if aws ec2 describe-volumes --volume-ids $VOLUME_ID | grep -q "InstanceId"; then
@@ -81,20 +57,14 @@ phases:
           aws ec2 detach-volume --volume-id $VOLUME_ID
           aws ec2 wait volume-available --volume-ids $VOLUME_ID
         fi
-
-      # Shared Terraform setup
       - cd shared
       - terraform init -backend-config="bucket=rln-${ENV}-terraform-backend" -backend-config="region=us-east-2" -backend-config="key=terraform_backend/${USER_ID}-shared.tfstate"
       - terraform apply --auto-approve -var="user_id=${USER_ID}" -var="region=us-east-2"
-
-      # Main Terraform setup
       - cd ../main
       - terraform init -backend-config="bucket=rln-${ENV}-terraform-backend" -backend-config="region=us-east-2" -backend-config="key=terraform_backend/${USER_ID}/${NODE_ID}.tfstate"
       - terraform validate
       - terraform plan -var="user_id=${USER_ID}" -var="user_node_ids=${USER_NODE}" -var="btc_network=${BTC_NETWORK}" -var="btc_rpc=${BTC_RPC}" -var="env=${ENV}" -var="network_load_balancer_arn=${CHOSEN_LB_ARN}" -var="network_load_balancer_dns=${CHOSEN_LB_DNS}" -var="api_gateway_vpclink_id=${CHOSEN_LB_ID}"
       - terraform apply --auto-approve -var="user_id=${USER_ID}" -var="user_node_ids=${USER_NODE}" -var="btc_network=${BTC_NETWORK}" -var="btc_rpc=${BTC_RPC}" -var="env=${ENV}" -var="network_load_balancer_arn=${CHOSEN_LB_ARN}" -var="network_load_balancer_dns=${CHOSEN_LB_DNS}" -var="api_gateway_vpclink_id=${CHOSEN_LB_ID}"
-
-      # Deployment Terraform setup
       - cd ../deployment
       - terraform init
       - terraform apply --replace=aws_api_gateway_deployment.deployment --auto-approve
