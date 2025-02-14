@@ -42,7 +42,7 @@ resource "aws_api_gateway_integration" "cors_options_integration_token" {
 
   type                    = "AWS_PROXY"
   integration_http_method = "POST"
-  uri                     = "arn:aws:apigateway:${var.aws_region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${var.aws_region}:${var.aws_account_id}:function:thunderstack-${var.env}-corsProxy/invocations"
+  uri                     = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-2:339712759892:function:thunderstack-${var.env}-corsProxy/invocations"
 
   passthrough_behavior = "WHEN_NO_MATCH"
 }
