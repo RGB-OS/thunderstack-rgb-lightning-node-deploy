@@ -40,11 +40,11 @@ resource "aws_api_gateway_integration" "cors_options_integration_token" {
   resource_id = aws_api_gateway_resource.proxy_resource_token[each.key].id
   http_method = aws_api_gateway_method.cors_options_token[each.key].http_method
 
-  type                    = "MOCK"
-  passthrough_behavior    = "WHEN_NO_MATCH"
-  request_templates       = {
-    "application/json" = "{\"statusCode\": 200}"
-  }
+  type                    = "AWS_PROXY"
+  integration_http_method = "POST"
+  uri                     = "arn:aws:apigateway:${var.aws_region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${var.aws_region}:${var.aws_account_id}:function:thunderstack-${var.env}-corsProxy/invocations"
+
+  passthrough_behavior = "WHEN_NO_MATCH"
 }
 
 resource "aws_api_gateway_integration_response" "cors_options_integration_response_token" {
