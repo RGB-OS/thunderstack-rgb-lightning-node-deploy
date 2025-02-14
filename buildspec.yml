@@ -23,15 +23,9 @@ phases:
           echo "LB_ARN: $LB_ARN"
           echo "LB_DNS: $LB_DNS"
           echo "VPC_LINK_ID: $VPC_LINK_ID"
-          if [ "$LB_ARN" = "arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public/1c83ff42632a54a8" ]; then
-            export CHOSEN_LB_ARN="arn:aws:elasticloadbalancing:us-east-2:339712759892:loadbalancer/net/vpc-link-nlb-public-3/c5fe8631053259f3"
-            export CHOSEN_LB_DNS="vpc-link-nlb-public-3-c5fe8631053259f3.elb.us-east-2.amazonaws.com"
-            export CHOSEN_LB_ID="i6hhpe"
-          else
-            export CHOSEN_LB_ARN=${LB_ARN:-$DEFAULT_LB_ARN}
-            export CHOSEN_LB_DNS=${LB_DNS:-$DEFAULT_LB_DNS}
-            export CHOSEN_LB_ID=${VPC_LINK_ID:-$DEFAULT_LB_ID}
-          fi
+          export CHOSEN_LB_ARN=${LB_ARN:-$DEFAULT_LB_ARN}
+          export CHOSEN_LB_DNS=${LB_DNS:-$DEFAULT_LB_DNS}
+          export CHOSEN_LB_ID=${VPC_LINK_ID:-$DEFAULT_LB_ID}
           rm -f node.tfstate
         else
           echo "tfstate file not found. Checking NLB listener counts..."
