@@ -42,19 +42,14 @@ resource "aws_api_gateway_integration" "cors_options_integration_token" {
 
   type                    = "AWS_PROXY"
   integration_http_method = "POST"
-  uri                     = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-2:339712759892:function:thunderstack-${var.env}-corsProxy/invocations"
+  uri                     = data.aws_lambda_alias.existing_alias.invoke_arn
 
   passthrough_behavior = "WHEN_NO_MATCH"
 }
 
-resource "aws_lambda_permission" "apigw_lambda" {
-  for_each = var.user_node_ids
-  statement_id  = "AllowExecutionFromAPIGateway${each.key}"
-  action        = "lambda:InvokeFunction"
-  function_name = "thunderstack-${var.env}-corsProxy"
-  principal     = "apigateway.amazonaws.com"
-
-  source_arn = "arn:aws:apigateway:us-east-2::/restapis/8619bu4cli/*"
+data "aws_lambda_alias" "existing_alias" {
+  function_name = "thunderstack-prod-corsProxy"
+  name          = "corsProxy"
 }
 
 resource "aws_api_gateway_integration_response" "cors_options_integration_response_token" {
