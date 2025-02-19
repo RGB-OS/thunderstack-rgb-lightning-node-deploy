@@ -48,7 +48,8 @@ resource "aws_api_gateway_integration" "cors_options_integration_token" {
 }
 
 resource "aws_lambda_permission" "apigw_lambda" {
-  statement_id  = "AllowExecutionFromAPIGateway"
+  for_each = var.user_node_ids
+  statement_id  = "AllowExecutionFromAPIGateway${each.key}"
   action        = "lambda:InvokeFunction"
   function_name = "thunderstack-${var.env}-corsProxy"
   principal     = "apigateway.amazonaws.com"
