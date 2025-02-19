@@ -47,6 +47,15 @@ resource "aws_api_gateway_integration" "cors_options_integration_token" {
   passthrough_behavior = "WHEN_NO_MATCH"
 }
 
+resource "aws_lambda_permission" "apigw_lambda" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = "thunderstack-${var.env}-corsProxy"
+  principal     = "apigateway.amazonaws.com"
+
+  source_arn = "arn:aws:apigateway:us-east-2::/restapis/8619bu4cli/*"
+}
+
 resource "aws_api_gateway_integration_response" "cors_options_integration_response_token" {
   for_each    = var.user_node_ids
   rest_api_id = "8619bu4cli"
