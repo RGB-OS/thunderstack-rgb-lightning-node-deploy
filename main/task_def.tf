@@ -30,7 +30,8 @@ resource "aws_ecs_task_definition" "rgb_task" {
         "--ldk-peer-listening-port",
         tostring(min(65535, 9000 + tonumber(each.value))),
         "--network",
-        "${var.btc_network}"
+        "${var.btc_network}",
+        "--disable-authentication"
       ],
       portMappings = [
         {
