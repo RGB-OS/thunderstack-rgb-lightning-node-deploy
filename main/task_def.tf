@@ -31,7 +31,7 @@ resource "aws_ecs_task_definition" "rgb_task" {
         tostring(min(65535, 9000 + tonumber(each.value))),
         "--network",
         "${var.btc_network}",
-        "--disable-authentication"
+        "--root-public-key ${var.biscuit_root_pubkey}"
       ],
       portMappings = [
         {
