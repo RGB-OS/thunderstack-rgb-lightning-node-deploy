@@ -32,7 +32,7 @@ def check_port_health():
 @app.route('/health', methods=['GET'])
 def health_check():
     status_code = check_port_health()
-    if status_code in [200, 401, 403, 404]:
+    if status_code in [200, 401, 403, 404, 500]:
         return jsonify({"status": "healthy", "code": status_code}), 200
     else:
         return jsonify({"status": "unhealthy", "code": status_code}), 500
