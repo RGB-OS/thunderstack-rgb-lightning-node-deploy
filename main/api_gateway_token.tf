@@ -75,8 +75,7 @@ resource "aws_api_gateway_method" "proxy_any_method_token" {
   rest_api_id = "8619bu4cli"
   resource_id   = aws_api_gateway_resource.proxy_resource_token[each.key].id
   http_method   = "ANY"
-  authorization = "CUSTOM"
-  authorizer_id = var.token_authorizer_id
+  authorization = "NONE"
   request_parameters = {
     "method.request.path.proxy" = true
   }

@@ -21,6 +21,11 @@ variable "btc_network" {
   type        = string
 }
 
+variable "biscuit_root_pubkey" {
+  description = "Biscuit root pubkey"
+  type        = string
+}
+
 variable "env" {
   description = "Thanderstack enviroment type (test/prod)"
   type        = string
